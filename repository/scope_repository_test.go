@@ -75,6 +75,25 @@ func TestCreateScope(t *testing.T) {
 	})
 }
 
+func TestCreateScopeWithExistingName(t *testing.T) {
+	db := infrastructure.ConnectDB()
+	repoScope := NewScopeRepository(db)
+	scope := &domain.Scope{
+		Name:        "Account:Show",
+		Description: "Show an account",
+	}
+
+	t.Run("Create a new Scope with Existing Name to DB", func(t *testing.T) {
+		scope, err := repoScope.Create(scope)
+		assert.Nil(t, err)
+		assert.NotNil(t, scope)
+
+		scope, err = repoScope.Create(scope)
+		assert.Nil(t, scope)
+		assert.NotNil(t, err)
+	})
+}
+
 func TestShowScope(t *testing.T) {
 
 	db := infrastructure.ConnectDB()
@@ -158,5 +177,4 @@ func TestDeleteScope(t *testing.T) {
 		err = repoScope.Delete(scope)
 		assert.Nil(t, err)
 	})
-
 }
