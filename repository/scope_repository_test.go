@@ -8,43 +8,45 @@ import (
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/suite"
 )
 
-type repoScopeMock struct {
+type RepoScopeMock struct {
 	mock.Mock
 }
 
-func NewRepoScopeMock() domain.ScopeRepository {
-	return &repoScopeMock{}
+type ScopeTestSuite struct {
+	suite.Suite
 }
 
-func (r *repoScopeMock) Create(scope *domain.Scope) (*domain.Scope, error) {
+func (suite *ScopeTestSuite) TearDownTest() {
+	db := infrastructure.ConnectDB()
+	db.Exec("DELETE FROM scopes WHERE 1=1")
+}
+
+func (r *RepoScopeMock) Create(scope *domain.Scope) (*domain.Scope, error) {
 	args := r.Called(scope)
 	return args.Get(0).(*domain.Scope), args.Error(1)
 }
 
-func (r *repoScopeMock) FindAll() ([]*domain.Scope, error) {
+func (r *RepoScopeMock) FindAll() ([]*domain.Scope, error) {
 	args := r.Called()
 	return args.Get(0).([]*domain.Scope), args.Error(1)
 }
 
-func (r *repoScopeMock) FindById(id int64) (*domain.Scope, error) {
-	args := r.Called(id)
-	return args.Get(0).(*domain.Scope), args.Error(1)
-}
-
-func (r *repoScopeMock) Update(scope *domain.Scope) (*domain.Scope, error) {
+func (r *RepoScopeMock) Update(scope *domain.Scope) (*domain.Scope, error) {
 	args := r.Called(scope)
 	return args.Get(0).(*domain.Scope), args.Error(1)
 }
 
-func (r *repoScopeMock) Delete(scope *domain.Scope) error {
+func (r *RepoScopeMock) Delete(scope *domain.Scope) error {
 	args := r.Called(scope)
 	return args.Error(0)
 }
 
-func TestCreateScope(t *testing.T) {
-	repoScopeMock := repoScopeMock{}
+func (suite *ScopeTestSuite) TestCreateScope() {
+	// Create a new Scope with mock
+	repoScopeMock := RepoScopeMock{}
 	scope := &domain.Scope{
 		Name:        "Account:Create",
 		Description: "Create an account",
@@ -58,56 +60,51 @@ func TestCreateScope(t *testing.T) {
 	}
 	repoScopeMock.On("Create", scope).Return(CreateScopeReponse, nil)
 
-	t.Run("Create a new Scope with mock", func(t *testing.T) {
-		assert.Equal(t, 123, 123, "they should be equal")
-		scope, err := repoScopeMock.Create(scope)
-		assert.Nil(t, err)
-		assert.NotNil(t, scope)
-	})
+	scope, err := repoScopeMock.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 
+	// Create a new Scope to DB
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 
-	t.Run("Create a new Scope to DB", func(t *testing.T) {
-		scope, err := repoScope.Create(scope)
-		assert.NotNil(t, scope.Id)
-		assert.Nil(t, err)
-	})
+	scope, err = repoScope.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 }
 
-func TestCreateScopeWithExistingName(t *testing.T) {
+func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 	scope := &domain.Scope{
-		Name:        "Account:Show",
-		Description: "Show an account",
+		Name:        "Account:ShowAll",
+		Description: "Show all accounts",
 	}
 
-	t.Run("Create a new Scope with Existing Name to DB", func(t *testing.T) {
-		scope, err := repoScope.Create(scope)
-		assert.Nil(t, err)
-		assert.NotNil(t, scope)
+	// Create a new Scope with Existing Name to DB
+	scope, err := repoScope.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 
-		scope, err = repoScope.Create(scope)
-		assert.Nil(t, scope)
-		assert.NotNil(t, err)
-	})
+	scope, err = repoScope.Create(scope)
+	assert.Nil(suite.T(), scope)
+	assert.NotNil(suite.T(), err)
+
 }
 
-func TestShowScope(t *testing.T) {
-
+func (suite *ScopeTestSuite) TestShowScope() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
-	t.Run("Show a Scope", func(t *testing.T) {
-		scopes, err := scopeRepo.FindAll()
-		assert.Nil(t, err)
-		assert.NotNil(t, scopes)
-	})
+
+	// Show a Scope
+	scopes, err := scopeRepo.FindAll()
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scopes)
 }
 
-func TestUpdateScope(t *testing.T) {
+func (suite *ScopeTestSuite) TestUpdateScope() {
 
-	repoScopeMock := repoScopeMock{}
+	repoScopeMock := RepoScopeMock{}
 	scope := &domain.Scope{
 		Name:        "WrongAccount:Update",
 		Description: "Update an account",
@@ -135,34 +132,32 @@ func TestUpdateScope(t *testing.T) {
 		UpdatedAt:   &now,
 	}
 	repoScopeMock.On("Update", CreateScopeReponse).Return(UpdateScopeResponse, nil)
-	t.Run("Update a Scope with mock", func(t *testing.T) {
 
-		scope, err := repoScopeMock.Create(scope)
-		assert.Nil(t, err)
-		assert.NotNil(t, scope)
+	// Update a Scope with mock
+	scope, err := repoScopeMock.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 
-		scope, err = repoScopeMock.Update(CreateScopeReponse)
-		assert.Nil(t, err)
-		assert.Equal(t, "Account:Update", scope.Name)
-	})
+	scope, err = repoScopeMock.Update(CreateScopeReponse)
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), "Account:Update", scope.Name)
 
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 
-	t.Run("Update a Scope to DB", func(t *testing.T) {
-		scope, err := repoScope.Create(scope)
-		assert.Nil(t, err)
-		assert.NotNil(t, scope)
+	//Update a Scope to DB
+	scope, err = repoScope.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 
-		scope.Name = "Account:Update"
-		scope, err = repoScope.Update(scope)
-		assert.Nil(t, err)
-		assert.Equal(t, "Account:Update", scope.Name)
-	})
+	scope.Name = "Account:Update"
+	scope, err = repoScope.Update(scope)
+	assert.Nil(suite.T(), err)
+	assert.Equal(suite.T(), "Account:Update", scope.Name)
+
 }
 
-func TestDeleteScope(t *testing.T) {
-
+func (suite *ScopeTestSuite) TestDeleteScope() {
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 	scope := &domain.Scope{
@@ -170,11 +165,15 @@ func TestDeleteScope(t *testing.T) {
 		Description: "Delete an account",
 	}
 
-	t.Run("Delete a Scope", func(t *testing.T) {
-		scope, err := repoScope.Create(scope)
-		assert.Nil(t, err)
+	//Delete a Scope
+	scope, err := repoScope.Create(scope)
+	assert.Nil(suite.T(), err)
 
-		err = repoScope.Delete(scope)
-		assert.Nil(t, err)
-	})
+	err = repoScope.Delete(scope)
+	assert.Nil(suite.T(), err)
+
+}
+
+func TestScopeTestSuite(t *testing.T) {
+	suite.Run(t, new(ScopeTestSuite))
 }
