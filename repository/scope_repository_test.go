@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"os"
 	"testing"
 	"time"
 
+	"github.com/ryakadev/rdf-be-auth-svc/config"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/stretchr/testify/assert"
@@ -17,6 +19,15 @@ type RepoScopeMock struct {
 
 type ScopeTestSuite struct {
 	suite.Suite
+}
+
+func (suite *ScopeTestSuite) SetupTest() {
+	config := config.NewDatabaseConfig()
+	os.Setenv("DB_HOST", config.Host)
+	os.Setenv("DB_PORT", config.Port)
+	os.Setenv("DB_USER", config.User)
+	os.Setenv("DB_PASS", config.Pass)
+	os.Setenv("DB_NAME", config.Name)
 }
 
 func (suite *ScopeTestSuite) TearDownTest() {
@@ -100,6 +111,25 @@ func (suite *ScopeTestSuite) TestShowScope() {
 	scopes, err := scopeRepo.FindAll()
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scopes)
+}
+
+func (suite *ScopeTestSuite) TestShowScopeById() {
+	db := infrastructure.ConnectDB()
+	repoScope := NewScopeRepository(db)
+	scope := &domain.Scope{
+		Name:        "Account:Show",
+		Description: "Show an account",
+	}
+
+	// Create a new Scope with Existing Name to DB
+	scope, err := repoScope.Create(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
+
+	// Show a Scope
+	scope, err = repoScope.FindById(scope.Id)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 }
 
 func (suite *ScopeTestSuite) TestUpdateScope() {
