@@ -38,6 +38,15 @@ func (r *ScopeRepository) FindAll() ([]*domain.Scope, error) {
 	return scopes, nil
 }
 
+func (r *ScopeRepository) FindById(id int64) (*domain.Scope, error) {
+	var scope domain.Scope
+	err := r.db.Where("id = ? AND deleted_at IS NULL", id).First(&scope).Error
+	if err != nil {
+		return nil, err
+	}
+	return &scope, nil
+}
+
 func (r *ScopeRepository) Update(scope *domain.Scope) (*domain.Scope, error) {
 	err := r.db.Save(scope).Error
 	if err != nil {
