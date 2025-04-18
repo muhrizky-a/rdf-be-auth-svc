@@ -16,6 +16,7 @@ type Scope struct {
 type ScopeRepository interface {
 	Create(scope *Scope) (*Scope, error)
 	FindAll() ([]*Scope, error)
+	FindById(int64) (*Scope, error)
 	Update(*Scope) (*Scope, error)
 	Delete(*Scope) error
 }
