@@ -20,6 +20,15 @@ func (u *ScopeUsecase) CreateScope(scope *domain.Scope) (*domain.Scope, error) {
 	return u.ScopeRepository.Create(scope)
 }
 
+func (u *ScopeUsecase) GetScope(scope *domain.Scope) (*domain.Scope, error) {
+	findScope, err := u.ScopeRepository.FindById(scope.Id)
+	if err != nil || findScope == nil {
+		return nil, err
+	}
+
+	return findScope, nil
+}
+
 func (u *ScopeUsecase) ShowScopes() ([]*domain.Scope, error) {
 	return u.ScopeRepository.FindAll()
 }
@@ -37,8 +46,8 @@ func (u *ScopeUsecase) UpdateScope(scope *domain.Scope) (*domain.Scope, error) {
 }
 
 func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
-	_, err := u.ScopeRepository.FindById(scope.Id)
-	if err != nil {
+	oldScope, err := u.ScopeRepository.FindById(scope.Id)
+	if err != nil || oldScope == nil {
 		return err
 	}
 
@@ -51,7 +60,5 @@ func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
 		return errors.New("Scope tidak bisa dihapus jika masih terhubung dengan role")
 	}
 
-	now := time.Now()
-	scope.DeletedAt = &now
-	return u.ScopeRepository.Delete(scope)
+	return u.ScopeRepository.Delete(oldScope)
 }

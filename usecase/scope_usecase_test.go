@@ -57,14 +57,30 @@ func (suite *ScopeUseCaseTestSuite) TestCreateScope() {
 	assert.NotNil(suite.T(), scope)
 }
 
-func (suite *ScopeUseCaseTestSuite) TestShowScope() {
+func (suite *ScopeUseCaseTestSuite) TesGetScope() {
+	db := infrastructure.ConnectDB()
+	scopeRepo := repository.NewScopeRepository(db)
+	roleScopeRepo := repository.NewRoleScopeRepository(db)
+	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
+	scope := &domain.Scope{
+		Name:        "Account:Show",
+		Description: "Show an account",
+	}
+
+	//Get a Scope
+	scope, err := scopeUC.GetScope(scope)
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
+}
+
+func (suite *ScopeUseCaseTestSuite) TestShowScopes() {
 
 	db := infrastructure.ConnectDB()
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	ucScope := NewScopeUsecase(scopeRepo, roleScopeRepo)
 
-	//Show a Scope
+	//Show Scopes
 	scopes, err := ucScope.ShowScopes()
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scopes)
