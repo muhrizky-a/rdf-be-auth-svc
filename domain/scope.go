@@ -23,6 +23,7 @@ type ScopeRepository interface {
 
 type ScopeUsecase interface {
 	CreateScope(*Scope) (*Scope, error)
+	GetScope(*Scope) (*Scope, error)
 	ShowScopes() ([]*Scope, error)
 	UpdateScope(*Scope) (*Scope, error)
 	DeleteScope(*Scope) error
