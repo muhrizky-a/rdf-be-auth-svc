@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "/proto";
+
+service ScopeService {
+    rpc CreateScope (CreateScopeRequest) returns (ScopeResponse);
+    rpc GetScope (GetScopeRequest) returns (ScopeResponse);
+    rpc ListScope (ListScopeRequest) returns (ListScopeResponse);
+    rpc UpdateScope (UpdateScopeRequest) returns (ScopeResponse);
+    rpc DeleteScope (DeleteScopeRequest) returns (DeleteResponse);
+} 
+
+message Scope {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string CreatedAt = 4;
+  string UpdatedAt = 5;
+  string DeletedAt = 6;
+}
+
+message CreateScopeRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message GetScopeRequest {
+  int64 id = 1;
+}
+
+message ListScopeRequest {}
+
+message ListScopeResponse {
+  repeated Scope scopes = 1;
+}
+
+message UpdateScopeRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DeleteScopeRequest {
+  int64 id = 1;
+}
+
+message ScopeResponse {
+  Scope scope = 1;
+}
+
+message DeleteResponse {
+  string message = 1;
+}
