@@ -59,14 +59,14 @@ func (suite *ScopeTestSuite) TestCreateScope() {
 	// Create a new Scope with mock
 	repoScopeMock := RepoScopeMock{}
 	scope := &domain.Scope{
-		Name:        "Account:Create",
-		Description: "Create an account",
+		Name:        "Scope:Create",
+		Description: "Create a scope",
 	}
 	now := time.Now()
 	CreateScopeReponse := &domain.Scope{
 		Id:          1,
-		Name:        "Account:Create",
-		Description: "Create an account",
+		Name:        "Scope:Create",
+		Description: "Create a scope",
 		CreatedAt:   &now,
 	}
 	repoScopeMock.On("Create", scope).Return(CreateScopeReponse, nil)
@@ -88,8 +88,8 @@ func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 	scope := &domain.Scope{
-		Name:        "Account:ShowAll",
-		Description: "Show all accounts",
+		Name:        "Scope:ShowAll",
+		Description: "Show all scopes",
 	}
 
 	// Create a new Scope with Existing Name to DB
@@ -117,8 +117,8 @@ func (suite *ScopeTestSuite) TestShowScopeById() {
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 	scope := &domain.Scope{
-		Name:        "Account:Show",
-		Description: "Show an account",
+		Name:        "Scope:Show",
+		Description: "Show a scope",
 	}
 
 	// Create a new Scope with Existing Name to DB
@@ -136,28 +136,28 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 
 	repoScopeMock := RepoScopeMock{}
 	scope := &domain.Scope{
-		Name:        "WrongAccount:Update",
-		Description: "Update an account",
+		Name:        "WrongScope:Update",
+		Description: "Update a scope",
 	}
 	now := time.Now()
 	CreateScopeReponse := &domain.Scope{
 		Id:          1,
-		Name:        "WrongAccount:Update",
-		Description: "Update an account",
+		Name:        "WrongScope:Update",
+		Description: "Update a scope",
 		CreatedAt:   &now,
 	}
 	repoScopeMock.On("Create", scope).Return(CreateScopeReponse, nil)
 	CreateScopeReponse = &domain.Scope{
 		Id:          1,
-		Name:        "Account:Update",
-		Description: "Update an account",
+		Name:        "Scope:Update",
+		Description: "Update a scope",
 		CreatedAt:   &now,
 	}
 	now = time.Now()
 	UpdateScopeResponse := &domain.Scope{
 		Id:          1,
-		Name:        "Account:Update",
-		Description: "Update an account",
+		Name:        "Scope:Update",
+		Description: "Update a scope",
 		CreatedAt:   &now,
 		UpdatedAt:   &now,
 	}
@@ -170,7 +170,7 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 
 	scope, err = repoScopeMock.Update(CreateScopeReponse)
 	assert.Nil(suite.T(), err)
-	assert.Equal(suite.T(), "Account:Update", scope.Name)
+	assert.Equal(suite.T(), "Scope:Update", scope.Name)
 
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
@@ -180,10 +180,10 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
 
-	scope.Name = "Account:Update"
+	scope.Name = "Scope:Update"
 	scope, err = repoScope.Update(scope)
 	assert.Nil(suite.T(), err)
-	assert.Equal(suite.T(), "Account:Update", scope.Name)
+	assert.Equal(suite.T(), "Scope:Update", scope.Name)
 
 }
 
@@ -191,8 +191,8 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	db := infrastructure.ConnectDB()
 	repoScope := NewScopeRepository(db)
 	scope := &domain.Scope{
-		Name:        "Account:Delete",
-		Description: "Delete an account",
+		Name:        "Scope:Delete",
+		Description: "Delete a scope",
 	}
 
 	//Delete a Scope

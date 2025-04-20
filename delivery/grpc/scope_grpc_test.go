@@ -42,8 +42,8 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 	scopeGRPC := NewScopeGRPC(scopeUC)
 
 	scope := domain.Scope{
-		Name:        "Account:Create",
-		Description: "Create an account",
+		Name:        "Scope:Create",
+		Description: "Create a scope",
 	}
 
 	suite.T().Run("Create a new Scope with mock", func(t *testing.T) {
@@ -86,8 +86,8 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 			context.Background(),
 			&proto.UpdateScopeRequest{
 				Id:          scope.Id,
-				Name:        "Account:Update",
-				Description: "Update an account",
+				Name:        "Scope:Update",
+				Description: "Update a scope",
 			},
 		)
 		assert.Nil(suite.T(), err)

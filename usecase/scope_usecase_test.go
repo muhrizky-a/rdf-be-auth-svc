@@ -48,8 +48,8 @@ func (suite *ScopeUseCaseTestSuite) TestCreateScope() {
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
 	scope := &domain.Scope{
-		Name:        "Account:Create",
-		Description: "Create an account",
+		Name:        "Scope:Create",
+		Description: "Create a scope",
 	}
 	// Create a new Scope with mock
 	scope, err := scopeUC.CreateScope(scope)
@@ -63,8 +63,8 @@ func (suite *ScopeUseCaseTestSuite) TesGetScope() {
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
 	scope := &domain.Scope{
-		Name:        "Account:Show",
-		Description: "Show an account",
+		Name:        "Scope:Show",
+		Description: "Show a scope",
 	}
 
 	//Get a Scope
@@ -92,15 +92,15 @@ func (suite *ScopeUseCaseTestSuite) TestUpdateScope() {
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
 	scope := &domain.Scope{
-		Name:        "WrongAccount:Update",
-		Description: "Update an account",
+		Name:        "WrongScope:Update",
+		Description: "Update a scope",
 	}
 
 	//Update a Scope
 	scope, err := scopeUC.CreateScope(scope)
 	assert.Nil(suite.T(), err)
 
-	scope.Name = "Account:Update"
+	scope.Name = "Scope:Update"
 	_, err = scopeUC.UpdateScope(scope)
 	assert.Nil(suite.T(), err)
 }
@@ -111,8 +111,8 @@ func (suite *ScopeUseCaseTestSuite) TestDeleteScope() {
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
 	scope := &domain.Scope{
-		Name:        "Account:Delete",
-		Description: "Delete an account",
+		Name:        "Scope:Delete",
+		Description: "Delete a scope",
 	}
 
 	scope, err := scopeUC.CreateScope(scope)
@@ -129,8 +129,8 @@ func (suite *ScopeUseCaseTestSuite) TestDeleteScopeWithRolesAttached() {
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := NewScopeUsecase(scopeRepo, roleScopeRepo)
 	scope := &domain.Scope{
-		Name:        "Account:Delete",
-		Description: "Delete an account",
+		Name:        "Scope:Delete",
+		Description: "Delete a scope",
 	}
 
 	scope, err := scopeUC.CreateScope(scope)
