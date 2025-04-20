@@ -31,6 +31,16 @@ go get gorm.io/driver/postgres
 
 docker image -> postgres:17-alpine
 
+## Go-migrate
+
+curl https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip -o migrate.windows-amd64.zip
+
+or
+
+wget https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip
+
+# Tutorials
+
 ## Load env
 
 ## Load env in PowerShell
@@ -55,3 +65,29 @@ migrate create -ext sql -dir db/migrations/ create-table-scopes -tz UTC
 <!-- migrate -path db/migrations -database"postgresql://username:secretkey@localhost:5432/database_name?sslmode=disable" up -->
 
 migrate -path db/migrations -database "postgresql://developer:supersecretpassword@localhost:5432/rdf_auth_db_test?sslmode=disable" up
+
+### Migrate down
+
+<!-- migrate -path db/migrations -database"postgresql://username:secretkey@localhost:5432/database_name?sslmode=disable" down -->
+
+migrate -path db/migrations -database "postgresql://developer:supersecretpassword@localhost:5432/rdf_auth_db_test?sslmode=disable" down
+
+### Migrate down all
+
+<!-- migrate -path db/migrations -database"postgresql://username:secretkey@localhost:5432/database_name?sslmode=disable" down  -all -->
+
+migrate -path db/migrations -database "postgresql://developer:supersecretpassword@localhost:5432/rdf_auth_db_test?sslmode=disable" down -all
+
+### Seeds DB
+
+go run db/seeds/main.go --table=scopes
+
+## Testing
+
+### Execute testing
+
+<!-- go test -count=1 -timeout 30m -p 1  <module/package> -->
+
+go test -count=1 -timeout 30m -p 1 github.com/ryakadev/rdf-be-auth-svc/repository
+go test -count=1 -timeout 30m -p 1 github.com/ryakadev/rdf-be-auth-svc/usecase
+go test -count=1 -timeout 30m -p 1 github.com/ryakadev/rdf-be-auth-svc/delivery/grpc
