@@ -86,6 +86,14 @@ migrate -path db/migrations -database "postgresql://developer:supersecretpasswor
 
 go run db/seeds/main.go --table=scopes
 
+## Protobuf
+
+### Apply protobuf
+
+<!-- protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative <protobuf_directory> -->
+
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/scope.proto
+
 ## Testing
 
 ### Execute testing
