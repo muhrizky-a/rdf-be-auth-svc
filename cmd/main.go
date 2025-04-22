@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/delivery/grpc"
-	"github.com/ryakadev/rdf-be-auth-svc/domain"
+	"github.com/ryakadev/rdf-be-auth-svc/helper"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
 	"github.com/ryakadev/rdf-be-auth-svc/repository"
@@ -30,24 +30,20 @@ func main() {
 
 	db := infrastructure.ConnectDB()
 
-	if err := db.AutoMigrate(&domain.Scope{}); err != nil {
-		log.Fatalf("Failed to migrate: %v", err)
-	}
-
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-
+	validator := helper.NewValidator()
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopeRepo)
-	scopeGRPC := grpc.NewScopeGRPC(scopeUC)
+	scopeGRPC := grpc.NewScopeGRPC(scopeUC, validator)
 
 	gRPCServer := gogrpc.NewServer()
 	proto.RegisterScopeServiceServer(gRPCServer, scopeGRPC)
 
-	log.Println("gRPC server is running on port" + port)
+	log.Println("gRPC server is running on port " + port)
 	err = gRPCServer.Serve(lis)
 	if err != nil {
 		log.Fatalf("Failed to serve gRPC server over port "+port+": %v", err)

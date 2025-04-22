@@ -4,6 +4,25 @@ import (
 	"time"
 )
 
+type CreateScopeRequest struct {
+	Name        string `validate:"required"`
+	Description string `validate:"required"`
+}
+
+type GetScopeRequest struct {
+	Id int64 `validate:"required"`
+}
+
+type UpdateScopeRequest struct {
+	Id          int64  `validate:"required"`
+	Name        string `validate:"required"`
+	Description string `validate:"required"`
+}
+
+type DeleteScopeRequest struct {
+	Id int64 `validate:"required"`
+}
+
 type Scope struct {
 	Id          int64  `gorm:"primaryKey"`
 	Name        string `gorm:"unique"`

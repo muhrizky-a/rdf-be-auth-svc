@@ -7,6 +7,8 @@ import (
 
 	"github.com/ryakadev/rdf-be-auth-svc/config"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
+	"github.com/ryakadev/rdf-be-auth-svc/helper"
+
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
 	"github.com/ryakadev/rdf-be-auth-svc/repository"
@@ -35,11 +37,12 @@ func (suite *ScopeGRPCTestSuite) TearDownSuite() {
 }
 
 func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
+	validator := helper.NewValidator()
 	db := infrastructure.ConnectDB()
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopesRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopesRepo)
-	scopeGRPC := NewScopeGRPC(scopeUC)
+	scopeGRPC := NewScopeGRPC(scopeUC, validator)
 
 	scope := domain.Scope{
 		Name:        "Scope:Create",
@@ -66,7 +69,7 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 	})
 
 	suite.T().Run("Show Scopes", func(t *testing.T) {
-		res, err := scopeGRPC.ShowScopes(context.Background(), &proto.ListScopeRequest{})
+		res, err := scopeGRPC.ListScope(context.Background(), &proto.ListScopeRequest{})
 		assert.Nil(suite.T(), err)
 		assert.NotNil(suite.T(), res)
 		scope.Id = res.Scopes[0].Id

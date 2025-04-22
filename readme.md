@@ -22,6 +22,14 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 export PATH="$PATH:$(go env GOPATH)/bin"
 
+## Go-migrate
+
+curl https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip -o migrate.windows-amd64.zip
+
+or
+
+wget https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip
+
 ## Gorm
 
 go get gorm.io/gorm
@@ -31,13 +39,9 @@ go get gorm.io/driver/postgres
 
 docker image -> postgres:17-alpine
 
-## Go-migrate
+## Validator
 
-curl https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip -o migrate.windows-amd64.zip
-
-or
-
-wget https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip
+go get github.com/go-playground/validator/v10
 
 # Tutorials
 
