@@ -31,7 +31,7 @@ func (r *ScopeRepository) Create(scope *domain.Scope) (*domain.Scope, error) {
 
 func (r *ScopeRepository) FindAll() ([]*domain.Scope, error) {
 	var scopes []*domain.Scope
-	err := r.db.Find(&scopes).Where("deleted_at IS NULL").Error
+	err := r.db.Where("deleted_at IS NULL").Find(&scopes).Error
 	if err != nil {
 		return nil, err
 	}
