@@ -6,6 +6,7 @@ import (
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
 	"github.com/ryakadev/rdf-be-auth-svc/helper"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
+	"google.golang.org/grpc/codes"
 )
 
 type ScopeGRPC struct {
@@ -39,7 +40,7 @@ func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeReque
 	}
 
 	res := &proto.ScopeResponse{
-		StatusCode: 0,
+		StatusCode: int32(codes.OK),
 		Message:    "Scope created succesfully",
 		Body: &proto.ScopeResponseBody{
 			Scope: &proto.Scope{
@@ -75,7 +76,7 @@ func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*
 	}
 
 	res := &proto.ScopeResponse{
-		StatusCode: 0,
+		StatusCode: int32(codes.OK),
 		Message:    "Scope retrieved succesfully",
 		Body: &proto.ScopeResponseBody{
 			Scope: &proto.Scope{
@@ -113,7 +114,7 @@ func (g *ScopeGRPC) ListScope(ctx context.Context, req *proto.ListScopeRequest) 
 	}
 
 	res := &proto.ListScopeResponse{
-		StatusCode: 0,
+		StatusCode: int32(codes.OK),
 		Message:    "Scope retrieved succesfully",
 		Body:       listScopeResponseBody,
 	}
@@ -144,7 +145,7 @@ func (g *ScopeGRPC) UpdateScope(ctx context.Context, req *proto.UpdateScopeReque
 	}
 
 	res := &proto.ScopeResponse{
-		StatusCode: 0,
+		StatusCode: int32(codes.OK),
 		Message:    "Scope updated succesfully",
 		Body: &proto.ScopeResponseBody{
 			Scope: &proto.Scope{
@@ -179,7 +180,7 @@ func (g *ScopeGRPC) DeleteScope(ctx context.Context, req *proto.DeleteScopeReque
 	}
 
 	return &proto.DeleteResponse{
-		StatusCode: 0,
+		StatusCode: int32(codes.OK),
 		Message:    "Scope deleted succesfully",
 	}, nil
 }
