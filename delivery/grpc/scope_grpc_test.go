@@ -72,7 +72,7 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 		res, err := scopeGRPC.ListScope(context.Background(), &proto.ListScopeRequest{})
 		assert.Nil(suite.T(), err)
 		assert.NotNil(suite.T(), res)
-		scope.Id = res.Scopes[0].Id
+		scope.Id = res.Body.Scopes[0].Id
 	})
 
 	suite.T().Run("Get a Scope", func(t *testing.T) {

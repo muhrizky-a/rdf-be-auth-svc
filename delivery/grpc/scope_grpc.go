@@ -39,13 +39,17 @@ func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeReque
 	}
 
 	res := &proto.ScopeResponse{
-		Scope: &proto.Scope{
-			Id:          scope.Id,
-			Name:        scope.Name,
-			Description: scope.Description,
-			CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
-			UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
-			DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+		StatusCode: 0,
+		Message:    "Scope created succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
 		},
 	}
 
@@ -71,13 +75,17 @@ func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*
 	}
 
 	res := &proto.ScopeResponse{
-		Scope: &proto.Scope{
-			Id:          scope.Id,
-			Name:        scope.Name,
-			Description: scope.Description,
-			CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
-			UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
-			DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+		StatusCode: 0,
+		Message:    "Scope retrieved succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
 		},
 	}
 
@@ -90,7 +98,7 @@ func (g *ScopeGRPC) ListScope(ctx context.Context, req *proto.ListScopeRequest) 
 		return nil, err
 	}
 
-	res := &proto.ListScopeResponse{Scopes: make([]*proto.Scope, 0, len(scopes))}
+	listScopeResponseBody := &proto.ListScopeResponseBody{Scopes: make([]*proto.Scope, 0, len(scopes))}
 	for _, v := range scopes {
 
 		scope := &proto.Scope{
@@ -101,7 +109,13 @@ func (g *ScopeGRPC) ListScope(ctx context.Context, req *proto.ListScopeRequest) 
 			UpdatedAt:   helper.SafeTimeString(v.UpdatedAt),
 			DeletedAt:   helper.SafeTimeString(v.DeletedAt),
 		}
-		res.Scopes = append(res.Scopes, scope)
+		listScopeResponseBody.Scopes = append(listScopeResponseBody.Scopes, scope)
+	}
+
+	res := &proto.ListScopeResponse{
+		StatusCode: 0,
+		Message:    "Scope retrieved succesfully",
+		Body:       listScopeResponseBody,
 	}
 
 	return res, nil
@@ -130,16 +144,19 @@ func (g *ScopeGRPC) UpdateScope(ctx context.Context, req *proto.UpdateScopeReque
 	}
 
 	res := &proto.ScopeResponse{
-		Scope: &proto.Scope{
-			Id:          scope.Id,
-			Name:        scope.Name,
-			Description: scope.Description,
-			CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
-			UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
-			DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+		StatusCode: 0,
+		Message:    "Scope updated succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
 		},
 	}
-
 	return res, nil
 }
 
@@ -162,6 +179,7 @@ func (g *ScopeGRPC) DeleteScope(ctx context.Context, req *proto.DeleteScopeReque
 	}
 
 	return &proto.DeleteResponse{
-		Message: "Scope deleted succesfully",
+		StatusCode: 0,
+		Message:    "Scope deleted succesfully",
 	}, nil
 }

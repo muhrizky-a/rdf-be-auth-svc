@@ -32,10 +32,6 @@ message GetScopeRequest {
 
 message ListScopeRequest {}
 
-message ListScopeResponse {
-  repeated Scope scopes = 1;
-}
-
 message UpdateScopeRequest {
   int64 id = 1;
   string name = 2;
@@ -46,10 +42,27 @@ message DeleteScopeRequest {
   int64 id = 1;
 }
 
-message ScopeResponse {
+message ScopeResponseBody {
   Scope scope = 1;
 }
 
+message ScopeResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  ScopeResponseBody body = 3;
+}
+
+message ListScopeResponseBody {
+  repeated Scope scopes = 1;
+}
+
+message ListScopeResponse {
+  int32 statusCode = 1;
+  string message = 2;
+  ListScopeResponseBody body = 3;
+}
+
 message DeleteResponse {
-  string message = 1;
+  int32 statusCode = 1;
+  string message = 2;
 }

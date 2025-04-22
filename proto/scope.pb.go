@@ -237,50 +237,6 @@ func (*ListScopeRequest) Descriptor() ([]byte, []int) {
 	return file_proto_scope_proto_rawDescGZIP(), []int{3}
 }
 
-type ListScopeResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Scopes        []*Scope               `protobuf:"bytes,1,rep,name=scopes,proto3" json:"scopes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListScopeResponse) Reset() {
-	*x = ListScopeResponse{}
-	mi := &file_proto_scope_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListScopeResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListScopeResponse) ProtoMessage() {}
-
-func (x *ListScopeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_scope_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListScopeResponse.ProtoReflect.Descriptor instead.
-func (*ListScopeResponse) Descriptor() ([]byte, []int) {
-	return file_proto_scope_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ListScopeResponse) GetScopes() []*Scope {
-	if x != nil {
-		return x.Scopes
-	}
-	return nil
-}
-
 type UpdateScopeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -292,7 +248,7 @@ type UpdateScopeRequest struct {
 
 func (x *UpdateScopeRequest) Reset() {
 	*x = UpdateScopeRequest{}
-	mi := &file_proto_scope_proto_msgTypes[5]
+	mi := &file_proto_scope_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -304,7 +260,7 @@ func (x *UpdateScopeRequest) String() string {
 func (*UpdateScopeRequest) ProtoMessage() {}
 
 func (x *UpdateScopeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_scope_proto_msgTypes[5]
+	mi := &file_proto_scope_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -317,7 +273,7 @@ func (x *UpdateScopeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateScopeRequest.ProtoReflect.Descriptor instead.
 func (*UpdateScopeRequest) Descriptor() ([]byte, []int) {
-	return file_proto_scope_proto_rawDescGZIP(), []int{5}
+	return file_proto_scope_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UpdateScopeRequest) GetId() int64 {
@@ -350,7 +306,7 @@ type DeleteScopeRequest struct {
 
 func (x *DeleteScopeRequest) Reset() {
 	*x = DeleteScopeRequest{}
-	mi := &file_proto_scope_proto_msgTypes[6]
+	mi := &file_proto_scope_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -362,7 +318,7 @@ func (x *DeleteScopeRequest) String() string {
 func (*DeleteScopeRequest) ProtoMessage() {}
 
 func (x *DeleteScopeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_scope_proto_msgTypes[6]
+	mi := &file_proto_scope_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,7 +331,7 @@ func (x *DeleteScopeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteScopeRequest.ProtoReflect.Descriptor instead.
 func (*DeleteScopeRequest) Descriptor() ([]byte, []int) {
-	return file_proto_scope_proto_rawDescGZIP(), []int{6}
+	return file_proto_scope_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DeleteScopeRequest) GetId() int64 {
@@ -385,9 +341,55 @@ func (x *DeleteScopeRequest) GetId() int64 {
 	return 0
 }
 
-type ScopeResponse struct {
+type ScopeResponseBody struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Scope         *Scope                 `protobuf:"bytes,1,opt,name=scope,proto3" json:"scope,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScopeResponseBody) Reset() {
+	*x = ScopeResponseBody{}
+	mi := &file_proto_scope_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScopeResponseBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScopeResponseBody) ProtoMessage() {}
+
+func (x *ScopeResponseBody) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_scope_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScopeResponseBody.ProtoReflect.Descriptor instead.
+func (*ScopeResponseBody) Descriptor() ([]byte, []int) {
+	return file_proto_scope_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ScopeResponseBody) GetScope() *Scope {
+	if x != nil {
+		return x.Scope
+	}
+	return nil
+}
+
+type ScopeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode    int32                  `protobuf:"varint,1,opt,name=statusCode,proto3" json:"statusCode,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Body          *ScopeResponseBody     `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -422,23 +424,142 @@ func (*ScopeResponse) Descriptor() ([]byte, []int) {
 	return file_proto_scope_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *ScopeResponse) GetScope() *Scope {
+func (x *ScopeResponse) GetStatusCode() int32 {
 	if x != nil {
-		return x.Scope
+		return x.StatusCode
+	}
+	return 0
+}
+
+func (x *ScopeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ScopeResponse) GetBody() *ScopeResponseBody {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+type ListScopeResponseBody struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Scopes        []*Scope               `protobuf:"bytes,1,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListScopeResponseBody) Reset() {
+	*x = ListScopeResponseBody{}
+	mi := &file_proto_scope_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListScopeResponseBody) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListScopeResponseBody) ProtoMessage() {}
+
+func (x *ListScopeResponseBody) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_scope_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListScopeResponseBody.ProtoReflect.Descriptor instead.
+func (*ListScopeResponseBody) Descriptor() ([]byte, []int) {
+	return file_proto_scope_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListScopeResponseBody) GetScopes() []*Scope {
+	if x != nil {
+		return x.Scopes
+	}
+	return nil
+}
+
+type ListScopeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode    int32                  `protobuf:"varint,1,opt,name=statusCode,proto3" json:"statusCode,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Body          *ListScopeResponseBody `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListScopeResponse) Reset() {
+	*x = ListScopeResponse{}
+	mi := &file_proto_scope_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListScopeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListScopeResponse) ProtoMessage() {}
+
+func (x *ListScopeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_scope_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListScopeResponse.ProtoReflect.Descriptor instead.
+func (*ListScopeResponse) Descriptor() ([]byte, []int) {
+	return file_proto_scope_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ListScopeResponse) GetStatusCode() int32 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
+func (x *ListScopeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ListScopeResponse) GetBody() *ListScopeResponseBody {
+	if x != nil {
+		return x.Body
 	}
 	return nil
 }
 
 type DeleteResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	StatusCode    int32                  `protobuf:"varint,1,opt,name=statusCode,proto3" json:"statusCode,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteResponse) Reset() {
 	*x = DeleteResponse{}
-	mi := &file_proto_scope_proto_msgTypes[8]
+	mi := &file_proto_scope_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -450,7 +571,7 @@ func (x *DeleteResponse) String() string {
 func (*DeleteResponse) ProtoMessage() {}
 
 func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_scope_proto_msgTypes[8]
+	mi := &file_proto_scope_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -463,7 +584,14 @@ func (x *DeleteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResponse.ProtoReflect.Descriptor instead.
 func (*DeleteResponse) Descriptor() ([]byte, []int) {
-	return file_proto_scope_proto_rawDescGZIP(), []int{8}
+	return file_proto_scope_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *DeleteResponse) GetStatusCode() int32 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
 }
 
 func (x *DeleteResponse) GetMessage() string {
@@ -490,19 +618,34 @@ const file_proto_scope_proto_rawDesc = "" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\"!\n" +
 	"\x0fGetScopeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"\x12\n" +
-	"\x10ListScopeRequest\"9\n" +
-	"\x11ListScopeResponse\x12$\n" +
-	"\x06scopes\x18\x01 \x03(\v2\f.proto.ScopeR\x06scopes\"Z\n" +
+	"\x10ListScopeRequest\"Z\n" +
 	"\x12UpdateScopeRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\"$\n" +
 	"\x12DeleteScopeRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\"3\n" +
-	"\rScopeResponse\x12\"\n" +
-	"\x05scope\x18\x01 \x01(\v2\f.proto.ScopeR\x05scope\"*\n" +
-	"\x0eDeleteResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xc9\x02\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
+	"\x11ScopeResponseBody\x12\"\n" +
+	"\x05scope\x18\x01 \x01(\v2\f.proto.ScopeR\x05scope\"w\n" +
+	"\rScopeResponse\x12\x1e\n" +
+	"\n" +
+	"statusCode\x18\x01 \x01(\x05R\n" +
+	"statusCode\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12,\n" +
+	"\x04body\x18\x03 \x01(\v2\x18.proto.ScopeResponseBodyR\x04body\"=\n" +
+	"\x15ListScopeResponseBody\x12$\n" +
+	"\x06scopes\x18\x01 \x03(\v2\f.proto.ScopeR\x06scopes\"\x7f\n" +
+	"\x11ListScopeResponse\x12\x1e\n" +
+	"\n" +
+	"statusCode\x18\x01 \x01(\x05R\n" +
+	"statusCode\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x120\n" +
+	"\x04body\x18\x03 \x01(\v2\x1c.proto.ListScopeResponseBodyR\x04body\"J\n" +
+	"\x0eDeleteResponse\x12\x1e\n" +
+	"\n" +
+	"statusCode\x18\x01 \x01(\x05R\n" +
+	"statusCode\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xc9\x02\n" +
 	"\fScopeService\x12>\n" +
 	"\vCreateScope\x12\x19.proto.CreateScopeRequest\x1a\x14.proto.ScopeResponse\x128\n" +
 	"\bGetScope\x12\x16.proto.GetScopeRequest\x1a\x14.proto.ScopeResponse\x12>\n" +
@@ -522,36 +665,40 @@ func file_proto_scope_proto_rawDescGZIP() []byte {
 	return file_proto_scope_proto_rawDescData
 }
 
-var file_proto_scope_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_proto_scope_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_proto_scope_proto_goTypes = []any{
-	(*Scope)(nil),              // 0: proto.Scope
-	(*CreateScopeRequest)(nil), // 1: proto.CreateScopeRequest
-	(*GetScopeRequest)(nil),    // 2: proto.GetScopeRequest
-	(*ListScopeRequest)(nil),   // 3: proto.ListScopeRequest
-	(*ListScopeResponse)(nil),  // 4: proto.ListScopeResponse
-	(*UpdateScopeRequest)(nil), // 5: proto.UpdateScopeRequest
-	(*DeleteScopeRequest)(nil), // 6: proto.DeleteScopeRequest
-	(*ScopeResponse)(nil),      // 7: proto.ScopeResponse
-	(*DeleteResponse)(nil),     // 8: proto.DeleteResponse
+	(*Scope)(nil),                 // 0: proto.Scope
+	(*CreateScopeRequest)(nil),    // 1: proto.CreateScopeRequest
+	(*GetScopeRequest)(nil),       // 2: proto.GetScopeRequest
+	(*ListScopeRequest)(nil),      // 3: proto.ListScopeRequest
+	(*UpdateScopeRequest)(nil),    // 4: proto.UpdateScopeRequest
+	(*DeleteScopeRequest)(nil),    // 5: proto.DeleteScopeRequest
+	(*ScopeResponseBody)(nil),     // 6: proto.ScopeResponseBody
+	(*ScopeResponse)(nil),         // 7: proto.ScopeResponse
+	(*ListScopeResponseBody)(nil), // 8: proto.ListScopeResponseBody
+	(*ListScopeResponse)(nil),     // 9: proto.ListScopeResponse
+	(*DeleteResponse)(nil),        // 10: proto.DeleteResponse
 }
 var file_proto_scope_proto_depIdxs = []int32{
-	0, // 0: proto.ListScopeResponse.scopes:type_name -> proto.Scope
-	0, // 1: proto.ScopeResponse.scope:type_name -> proto.Scope
-	1, // 2: proto.ScopeService.CreateScope:input_type -> proto.CreateScopeRequest
-	2, // 3: proto.ScopeService.GetScope:input_type -> proto.GetScopeRequest
-	3, // 4: proto.ScopeService.ListScope:input_type -> proto.ListScopeRequest
-	5, // 5: proto.ScopeService.UpdateScope:input_type -> proto.UpdateScopeRequest
-	6, // 6: proto.ScopeService.DeleteScope:input_type -> proto.DeleteScopeRequest
-	7, // 7: proto.ScopeService.CreateScope:output_type -> proto.ScopeResponse
-	7, // 8: proto.ScopeService.GetScope:output_type -> proto.ScopeResponse
-	4, // 9: proto.ScopeService.ListScope:output_type -> proto.ListScopeResponse
-	7, // 10: proto.ScopeService.UpdateScope:output_type -> proto.ScopeResponse
-	8, // 11: proto.ScopeService.DeleteScope:output_type -> proto.DeleteResponse
-	7, // [7:12] is the sub-list for method output_type
-	2, // [2:7] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0,  // 0: proto.ScopeResponseBody.scope:type_name -> proto.Scope
+	6,  // 1: proto.ScopeResponse.body:type_name -> proto.ScopeResponseBody
+	0,  // 2: proto.ListScopeResponseBody.scopes:type_name -> proto.Scope
+	8,  // 3: proto.ListScopeResponse.body:type_name -> proto.ListScopeResponseBody
+	1,  // 4: proto.ScopeService.CreateScope:input_type -> proto.CreateScopeRequest
+	2,  // 5: proto.ScopeService.GetScope:input_type -> proto.GetScopeRequest
+	3,  // 6: proto.ScopeService.ListScope:input_type -> proto.ListScopeRequest
+	4,  // 7: proto.ScopeService.UpdateScope:input_type -> proto.UpdateScopeRequest
+	5,  // 8: proto.ScopeService.DeleteScope:input_type -> proto.DeleteScopeRequest
+	7,  // 9: proto.ScopeService.CreateScope:output_type -> proto.ScopeResponse
+	7,  // 10: proto.ScopeService.GetScope:output_type -> proto.ScopeResponse
+	9,  // 11: proto.ScopeService.ListScope:output_type -> proto.ListScopeResponse
+	7,  // 12: proto.ScopeService.UpdateScope:output_type -> proto.ScopeResponse
+	10, // 13: proto.ScopeService.DeleteScope:output_type -> proto.DeleteResponse
+	9,  // [9:14] is the sub-list for method output_type
+	4,  // [4:9] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_proto_scope_proto_init() }
@@ -565,7 +712,7 @@ func file_proto_scope_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_scope_proto_rawDesc), len(file_proto_scope_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
