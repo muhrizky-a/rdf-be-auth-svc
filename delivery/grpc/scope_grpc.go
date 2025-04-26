@@ -1,0 +1,186 @@
+package grpc
+
+import (
+	"context"
+
+	"github.com/ryakadev/rdf-be-auth-svc/domain"
+	"github.com/ryakadev/rdf-be-auth-svc/helper"
+	"github.com/ryakadev/rdf-be-auth-svc/proto"
+	"google.golang.org/grpc/codes"
+)
+
+type ScopeGRPC struct {
+	proto.UnimplementedScopeServiceServer
+	ScopeUsecase domain.ScopeUsecase
+	Validator    *helper.Validator
+}
+
+func NewScopeGRPC(usecase domain.ScopeUsecase, validator *helper.Validator) *ScopeGRPC {
+	return &ScopeGRPC{ScopeUsecase: usecase, Validator: validator}
+}
+
+func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeRequest) (*proto.ScopeResponse, error) {
+	createScopeRequest := &domain.CreateScopeRequest{
+		Name:        req.Name,
+		Description: req.Description,
+	}
+
+	if err := g.Validator.Validate(createScopeRequest); err != nil {
+		return nil, err
+	}
+
+	scope := &domain.Scope{
+		Name:        req.Name,
+		Description: req.Description,
+	}
+
+	scope, err := g.ScopeUsecase.CreateScope(scope)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &proto.ScopeResponse{
+		StatusCode: int32(codes.OK),
+		Message:    "Scope created succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
+		},
+	}
+
+	return res, nil
+}
+
+func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*proto.ScopeResponse, error) {
+	getScopeRequest := &domain.GetScopeRequest{
+		Id: req.Id,
+	}
+
+	if err := g.Validator.Validate(getScopeRequest); err != nil {
+		return nil, err
+	}
+
+	scope := &domain.Scope{
+		Id: req.Id,
+	}
+
+	scope, err := g.ScopeUsecase.GetScope(scope)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &proto.ScopeResponse{
+		StatusCode: int32(codes.OK),
+		Message:    "Scope retrieved succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
+		},
+	}
+
+	return res, nil
+}
+
+func (g *ScopeGRPC) ListScope(ctx context.Context, req *proto.ListScopeRequest) (*proto.ListScopeResponse, error) {
+	scopes, err := g.ScopeUsecase.ShowScopes()
+	if err != nil {
+		return nil, err
+	}
+
+	listScopeResponseBody := &proto.ListScopeResponseBody{Scopes: make([]*proto.Scope, 0, len(scopes))}
+	for _, v := range scopes {
+
+		scope := &proto.Scope{
+			Id:          v.Id,
+			Name:        v.Name,
+			Description: v.Description,
+			CreatedAt:   helper.SafeTimeString(v.CreatedAt),
+			UpdatedAt:   helper.SafeTimeString(v.UpdatedAt),
+			DeletedAt:   helper.SafeTimeString(v.DeletedAt),
+		}
+		listScopeResponseBody.Scopes = append(listScopeResponseBody.Scopes, scope)
+	}
+
+	res := &proto.ListScopeResponse{
+		StatusCode: int32(codes.OK),
+		Message:    "Scope retrieved succesfully",
+		Body:       listScopeResponseBody,
+	}
+
+	return res, nil
+}
+
+func (g *ScopeGRPC) UpdateScope(ctx context.Context, req *proto.UpdateScopeRequest) (*proto.ScopeResponse, error) {
+	updateScopeRequest := &domain.UpdateScopeRequest{
+		Id:          req.Id,
+		Name:        req.Name,
+		Description: req.Description,
+	}
+
+	if err := g.Validator.Validate(updateScopeRequest); err != nil {
+		return nil, err
+	}
+
+	scope := &domain.Scope{
+		Id:          req.Id,
+		Name:        req.Name,
+		Description: req.Description,
+	}
+
+	scope, err := g.ScopeUsecase.UpdateScope(scope)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &proto.ScopeResponse{
+		StatusCode: int32(codes.OK),
+		Message:    "Scope updated succesfully",
+		Body: &proto.ScopeResponseBody{
+			Scope: &proto.Scope{
+				Id:          scope.Id,
+				Name:        scope.Name,
+				Description: scope.Description,
+				CreatedAt:   helper.SafeTimeString(scope.CreatedAt),
+				UpdatedAt:   helper.SafeTimeString(scope.UpdatedAt),
+				DeletedAt:   helper.SafeTimeString(scope.DeletedAt),
+			},
+		},
+	}
+	return res, nil
+}
+
+func (g *ScopeGRPC) DeleteScope(ctx context.Context, req *proto.DeleteScopeRequest) (*proto.DeleteResponse, error) {
+	deleteScopeRequest := &domain.DeleteScopeRequest{
+		Id: req.Id,
+	}
+
+	if err := g.Validator.Validate(deleteScopeRequest); err != nil {
+		return nil, err
+	}
+
+	scope := &domain.Scope{
+		Id: req.Id,
+	}
+
+	err := g.ScopeUsecase.DeleteScope(scope)
+	if err != nil {
+		return nil, err
+	}
+
+	return &proto.DeleteResponse{
+		StatusCode: int32(codes.OK),
+		Message:    "Scope deleted succesfully",
+	}, nil
+}
