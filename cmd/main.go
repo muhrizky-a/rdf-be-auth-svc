@@ -17,18 +17,28 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3001"
-	}
-
 	err := godotenv.Load()
 
 	if err != nil {
 		log.Fatalf("Error loading .env file")
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3001"
+	}
+
 	db := infrastructure.ConnectDB()
+
+	// Run migrations
+	if err := helper.RunMigrations(db); err != nil {
+		log.Fatal("Migrations failed: ", err)
+	}
+
+	// Run seeds
+	if err := helper.RunSeeds(db); err != nil {
+		log.Fatal("Seeding failed: ", err)
+	}
 
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
