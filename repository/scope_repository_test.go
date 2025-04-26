@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"os"
+	"log"
 	"testing"
 	"time"
 
-	"github.com/ryakadev/rdf-be-auth-svc/config"
+	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/stretchr/testify/assert"
@@ -22,12 +22,12 @@ type ScopeTestSuite struct {
 }
 
 func (suite *ScopeTestSuite) SetupTest() {
-	config := config.NewDatabaseConfig()
-	os.Setenv("DB_HOST", config.Host)
-	os.Setenv("DB_PORT", config.Port)
-	os.Setenv("DB_USER", config.User)
-	os.Setenv("DB_PASS", config.Pass)
-	os.Setenv("DB_NAME", config.Name)
+	// Load .env in project root directory
+	err := godotenv.Load("../.env")
+
+	if err != nil {
+		log.Println("Error loading .env file in ScopeTestSuite.SetupTest(). Using default env...")
+	}
 }
 
 func (suite *ScopeTestSuite) TearDownTest() {

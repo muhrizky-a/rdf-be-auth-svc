@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	"os"
+	"log"
 	"testing"
 
-	"github.com/ryakadev/rdf-be-auth-svc/config"
+	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/ryakadev/rdf-be-auth-svc/repository"
@@ -27,12 +27,12 @@ func (r *RepoRoleScopeMock) FindRoleScopesByScopeId(id int64) ([]*domain.RoleSco
 }
 
 func (suite *ScopeUseCaseTestSuite) SetupTest() {
-	config := config.NewDatabaseConfig()
-	os.Setenv("DB_HOST", config.Host)
-	os.Setenv("DB_PORT", config.Port)
-	os.Setenv("DB_USER", config.User)
-	os.Setenv("DB_PASS", config.Pass)
-	os.Setenv("DB_NAME", config.Name)
+	// Load .env in project root directory
+	err := godotenv.Load("../.env")
+
+	if err != nil {
+		log.Println("Error loading .env file in ScopeUseCaseTestSuite.SetupTest(). Using default env...")
+	}
 }
 
 func (suite *ScopeUseCaseTestSuite) TearDownTest() {
