@@ -57,7 +57,7 @@ func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
 	}
 
 	if len(roleScopes) > 0 {
-		return errors.New("Unable to delete Scope while tied to a role / roles")
+		return errors.New("SCOPE_USE_CASE.SCOPE_TIED_TO_ROLES")
 	}
 
 	return u.ScopeRepository.Delete(oldScope)
