@@ -7,8 +7,8 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
+	"github.com/ryakadev/rdf-be-auth-svc/exceptions"
 	"github.com/ryakadev/rdf-be-auth-svc/helper"
-
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
 	"github.com/ryakadev/rdf-be-auth-svc/repository"
@@ -37,12 +37,15 @@ func (suite *ScopeGRPCTestSuite) TearDownSuite() {
 }
 
 func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
+	httpErrorTranslator := exceptions.NewHTTPErrorTranslator()
 	validator := helper.NewValidator()
+	grpcValidator := helper.NewGRPCValidator(validator, httpErrorTranslator)
+
 	db := infrastructure.ConnectDB()
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopesRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopesRepo)
-	scopeGRPC := NewScopeGRPC(scopeUC, validator)
+	scopeGRPC := NewScopeGRPC(scopeUC, grpcValidator, httpErrorTranslator)
 
 	scope := domain.Scope{
 		Name:        "Scope:Create",

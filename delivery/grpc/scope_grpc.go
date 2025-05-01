@@ -4,19 +4,29 @@ import (
 	"context"
 
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
+	"github.com/ryakadev/rdf-be-auth-svc/exceptions"
 	"github.com/ryakadev/rdf-be-auth-svc/helper"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type ScopeGRPC struct {
 	proto.UnimplementedScopeServiceServer
-	ScopeUsecase domain.ScopeUsecase
-	Validator    *helper.Validator
+	ScopeUsecase        domain.ScopeUsecase
+	GRPCValidator       *helper.GRPCValidator
+	HTTPErrorTranslator *exceptions.HTTPErrorTranslator
 }
 
-func NewScopeGRPC(usecase domain.ScopeUsecase, validator *helper.Validator) *ScopeGRPC {
-	return &ScopeGRPC{ScopeUsecase: usecase, Validator: validator}
+func NewScopeGRPC(usecase domain.ScopeUsecase,
+	validator *helper.GRPCValidator,
+	httpErrorTranslator *exceptions.HTTPErrorTranslator,
+) *ScopeGRPC {
+	return &ScopeGRPC{
+		ScopeUsecase:        usecase,
+		GRPCValidator:       validator,
+		HTTPErrorTranslator: httpErrorTranslator,
+	}
 }
 
 func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeRequest) (*proto.ScopeResponse, error) {
@@ -25,8 +35,8 @@ func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeReque
 		Description: req.Description,
 	}
 
-	if err := g.Validator.Validate(createScopeRequest); err != nil {
-		return nil, err
+	if err := g.GRPCValidator.Validator.Validate(createScopeRequest); err != nil {
+		return nil, g.GRPCValidator.CreateGRPCValidationError(err)
 	}
 
 	scope := &domain.Scope{
@@ -36,7 +46,13 @@ func (g *ScopeGRPC) CreateScope(ctx context.Context, req *proto.CreateScopeReque
 
 	scope, err := g.ScopeUsecase.CreateScope(scope)
 	if err != nil {
-		return nil, err
+		httpError := g.HTTPErrorTranslator.Translate(err)
+		grpcStatusCode := g.HTTPErrorTranslator.TranslateGRPCStatusCode(httpError.StatusCode)
+		errorf := status.Errorf(
+			codes.Code(grpcStatusCode),
+			"%v", httpError.Message,
+		)
+		return nil, errorf
 	}
 
 	res := &proto.ScopeResponse{
@@ -62,8 +78,8 @@ func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*
 		Id: req.Id,
 	}
 
-	if err := g.Validator.Validate(getScopeRequest); err != nil {
-		return nil, err
+	if err := g.GRPCValidator.Validator.Validate(getScopeRequest); err != nil {
+		return nil, g.GRPCValidator.CreateGRPCValidationError(err)
 	}
 
 	scope := &domain.Scope{
@@ -72,7 +88,13 @@ func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*
 
 	scope, err := g.ScopeUsecase.GetScope(scope)
 	if err != nil {
-		return nil, err
+		httpError := g.HTTPErrorTranslator.Translate(err)
+		grpcStatusCode := g.HTTPErrorTranslator.TranslateGRPCStatusCode(httpError.StatusCode)
+		errorf := status.Errorf(
+			codes.Code(grpcStatusCode),
+			"%v", httpError.Message,
+		)
+		return nil, errorf
 	}
 
 	res := &proto.ScopeResponse{
@@ -96,7 +118,13 @@ func (g *ScopeGRPC) GetScope(ctx context.Context, req *proto.GetScopeRequest) (*
 func (g *ScopeGRPC) ListScope(ctx context.Context, req *proto.ListScopeRequest) (*proto.ListScopeResponse, error) {
 	scopes, err := g.ScopeUsecase.ShowScopes()
 	if err != nil {
-		return nil, err
+		httpError := g.HTTPErrorTranslator.Translate(err)
+		grpcStatusCode := g.HTTPErrorTranslator.TranslateGRPCStatusCode(httpError.StatusCode)
+		errorf := status.Errorf(
+			codes.Code(grpcStatusCode),
+			"%v", httpError.Message,
+		)
+		return nil, errorf
 	}
 
 	listScopeResponseBody := &proto.ListScopeResponseBody{Scopes: make([]*proto.Scope, 0, len(scopes))}
@@ -129,8 +157,8 @@ func (g *ScopeGRPC) UpdateScope(ctx context.Context, req *proto.UpdateScopeReque
 		Description: req.Description,
 	}
 
-	if err := g.Validator.Validate(updateScopeRequest); err != nil {
-		return nil, err
+	if err := g.GRPCValidator.Validator.Validate(updateScopeRequest); err != nil {
+		return nil, g.GRPCValidator.CreateGRPCValidationError(err)
 	}
 
 	scope := &domain.Scope{
@@ -141,7 +169,13 @@ func (g *ScopeGRPC) UpdateScope(ctx context.Context, req *proto.UpdateScopeReque
 
 	scope, err := g.ScopeUsecase.UpdateScope(scope)
 	if err != nil {
-		return nil, err
+		httpError := g.HTTPErrorTranslator.Translate(err)
+		grpcStatusCode := g.HTTPErrorTranslator.TranslateGRPCStatusCode(httpError.StatusCode)
+		errorf := status.Errorf(
+			codes.Code(grpcStatusCode),
+			"%v", httpError.Message,
+		)
+		return nil, errorf
 	}
 
 	res := &proto.ScopeResponse{
@@ -166,8 +200,8 @@ func (g *ScopeGRPC) DeleteScope(ctx context.Context, req *proto.DeleteScopeReque
 		Id: req.Id,
 	}
 
-	if err := g.Validator.Validate(deleteScopeRequest); err != nil {
-		return nil, err
+	if err := g.GRPCValidator.Validator.Validate(deleteScopeRequest); err != nil {
+		return nil, g.GRPCValidator.CreateGRPCValidationError(err)
 	}
 
 	scope := &domain.Scope{
@@ -176,7 +210,13 @@ func (g *ScopeGRPC) DeleteScope(ctx context.Context, req *proto.DeleteScopeReque
 
 	err := g.ScopeUsecase.DeleteScope(scope)
 	if err != nil {
-		return nil, err
+		httpError := g.HTTPErrorTranslator.Translate(err)
+		grpcStatusCode := g.HTTPErrorTranslator.TranslateGRPCStatusCode(httpError.StatusCode)
+		errorf := status.Errorf(
+			codes.Code(grpcStatusCode),
+			"%v", httpError.Message,
+		)
+		return nil, errorf
 	}
 
 	return &proto.DeleteResponse{

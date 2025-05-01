@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/delivery/grpc"
+	"github.com/ryakadev/rdf-be-auth-svc/exceptions"
 	"github.com/ryakadev/rdf-be-auth-svc/helper"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/ryakadev/rdf-be-auth-svc/proto"
@@ -44,11 +45,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
+	httpErrorTranslator := exceptions.NewHTTPErrorTranslator()
 	validator := helper.NewValidator()
+	grpcValidator := helper.NewGRPCValidator(validator, httpErrorTranslator)
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopeRepo)
-	scopeGRPC := grpc.NewScopeGRPC(scopeUC, validator)
+	scopeGRPC := grpc.NewScopeGRPC(scopeUC, grpcValidator, httpErrorTranslator)
 
 	gRPCServer := gogrpc.NewServer()
 	proto.RegisterScopeServiceServer(gRPCServer, scopeGRPC)
