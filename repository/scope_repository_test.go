@@ -1,21 +1,16 @@
 package repository
 
 import (
+	"errors"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
 	"github.com/ryakadev/rdf-be-auth-svc/infrastructure"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
-
-type RepoScopeMock struct {
-	mock.Mock
-}
 
 type ScopeTestSuite struct {
 	suite.Suite
@@ -34,174 +29,278 @@ func (suite *ScopeTestSuite) TearDownTest() {
 	db := infrastructure.ConnectDB()
 	db.Exec("DELETE FROM scopes WHERE 1=1")
 }
-
-func (r *RepoScopeMock) Create(scope *domain.Scope) (*domain.Scope, error) {
-	args := r.Called(scope)
-	return args.Get(0).(*domain.Scope), args.Error(1)
-}
-
-func (r *RepoScopeMock) FindAll() ([]*domain.Scope, error) {
-	args := r.Called()
-	return args.Get(0).([]*domain.Scope), args.Error(1)
-}
-
-func (r *RepoScopeMock) Update(scope *domain.Scope) (*domain.Scope, error) {
-	args := r.Called(scope)
-	return args.Get(0).(*domain.Scope), args.Error(1)
-}
-
-func (r *RepoScopeMock) Delete(scope *domain.Scope) error {
-	args := r.Called(scope)
-	return args.Error(0)
-}
-
 func (suite *ScopeTestSuite) TestCreateScope() {
-	// Create a new Scope with mock
-	repoScopeMock := RepoScopeMock{}
+	// Arrange
 	scope := &domain.Scope{
 		Name:        "Scope:Create",
 		Description: "Create a scope",
 	}
-	now := time.Now()
-	CreateScopeReponse := &domain.Scope{
-		Id:          1,
-		Name:        "Scope:Create",
-		Description: "Create a scope",
-		CreatedAt:   &now,
-	}
-	repoScopeMock.On("Create", scope).Return(CreateScopeReponse, nil)
-
-	scope, err := repoScopeMock.Create(scope)
-	assert.Nil(suite.T(), err)
-	assert.NotNil(suite.T(), scope)
-
-	// Create a new Scope to DB
-	db := infrastructure.ConnectDB()
-	repoScope := NewScopeRepository(db)
-
-	scope, err = repoScope.Create(scope)
-	assert.Nil(suite.T(), err)
-	assert.NotNil(suite.T(), scope)
-}
-
-func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
-	db := infrastructure.ConnectDB()
-	repoScope := NewScopeRepository(db)
-	scope := &domain.Scope{
-		Name:        "Scope:ShowAll",
-		Description: "Show all scopes",
-	}
-
-	// Create a new Scope with Existing Name to DB
-	scope, err := repoScope.Create(scope)
-	assert.Nil(suite.T(), err)
-	assert.NotNil(suite.T(), scope)
-
-	scope, err = repoScope.Create(scope)
-	assert.Nil(suite.T(), scope)
-	assert.NotNil(suite.T(), err)
-
-}
-
-func (suite *ScopeTestSuite) TestShowScope() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
-	// Show a Scope
+	// Action
+	scope, err := scopeRepo.Create(scope)
+
+	// Assert
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
+	assert.Equal(
+		suite.T(),
+		scope,
+		&domain.Scope{
+			Id:          scope.Id,
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+			CreatedAt:   scope.CreatedAt,
+			UpdatedAt:   scope.UpdatedAt,
+		},
+	)
+
+	/// Make sure there are one scope persists in database
 	scopes, err := scopeRepo.FindAll()
+	assert.Equal(suite.T(), len(scopes), 1)
+}
+
+func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
+	// Arrange
+	scope := &domain.Scope{
+		Name:        "Scope:Create",
+		Description: "Create a scope",
+	}
+	db := infrastructure.ConnectDB()
+	scopeRepo := NewScopeRepository(db)
+
+	/// Creating new scope
+	_, err := scopeRepo.Create(scope)
+	assert.Nil(suite.T(), err)
+
+	// Action
+	scope, err = scopeRepo.Create(scope)
+
+	// Assert
+	assert.Nil(suite.T(), scope)
+	assert.NotNil(suite.T(), err)
+	assert.Equal(suite.T(), err, errors.New("SCOPE_REPOSITORY.DUPLICATE_NAME"))
+}
+
+func (suite *ScopeTestSuite) TestShowScopes() {
+	// Arrange
+	db := infrastructure.ConnectDB()
+	scopeRepo := NewScopeRepository(db)
+
+	/// Creating two scopes
+	_, err := scopeRepo.Create(
+		&domain.Scope{
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+		},
+	)
+	assert.Nil(suite.T(), err)
+	_, err = scopeRepo.Create(
+		&domain.Scope{
+			Name:        "Scope:ShowAll",
+			Description: "Show all scopes",
+		},
+	)
+	assert.Nil(suite.T(), err)
+
+	// Action
+	scopes, err := scopeRepo.FindAll()
+	firstScope, secondScope := scopes[0], scopes[1]
+
+	// Assert
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scopes)
+	assert.Equal(suite.T(), len(scopes), 2)
+	assert.Contains(
+		suite.T(),
+		scopes,
+		&domain.Scope{
+			Id:          firstScope.Id,
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+			CreatedAt:   firstScope.CreatedAt,
+			UpdatedAt:   firstScope.UpdatedAt,
+		},
+	)
+	assert.Equal(
+		suite.T(),
+		firstScope,
+		&domain.Scope{
+			Id:          firstScope.Id,
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+			CreatedAt:   firstScope.CreatedAt,
+			UpdatedAt:   firstScope.UpdatedAt,
+		},
+	)
+	assert.Contains(
+		suite.T(),
+		scopes,
+		&domain.Scope{
+			Id:          secondScope.Id,
+			Name:        "Scope:ShowAll",
+			Description: "Show all scopes",
+			CreatedAt:   secondScope.CreatedAt,
+			UpdatedAt:   secondScope.UpdatedAt,
+		},
+	)
+	assert.Equal(
+		suite.T(),
+		secondScope,
+		&domain.Scope{
+			Id:          secondScope.Id,
+			Name:        "Scope:ShowAll",
+			Description: "Show all scopes",
+			CreatedAt:   secondScope.CreatedAt,
+			UpdatedAt:   secondScope.UpdatedAt,
+		},
+	)
 }
 
 func (suite *ScopeTestSuite) TestShowScopeById() {
+	// Arrange
 	db := infrastructure.ConnectDB()
-	repoScope := NewScopeRepository(db)
-	scope := &domain.Scope{
-		Name:        "Scope:Show",
-		Description: "Show a scope",
-	}
-
-	// Create a new Scope with Existing Name to DB
-	scope, err := repoScope.Create(scope)
+	scopeRepo := NewScopeRepository(db)
+	scope, err := scopeRepo.Create(
+		&domain.Scope{
+			Name:        "Scope:Show",
+			Description: "Show a scope",
+		},
+	)
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
 
-	// Show a Scope
-	scope, err = repoScope.FindById(scope.Id)
+	// Action
+	scope, err = scopeRepo.FindById(scope.Id)
+
+	// Assert
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
+	assert.Equal(suite.T(),
+		scope,
+		&domain.Scope{
+			Id:          scope.Id,
+			Name:        "Scope:Show",
+			Description: "Show a scope",
+			CreatedAt:   scope.CreatedAt,
+			UpdatedAt:   scope.UpdatedAt,
+		},
+	)
+}
+
+func (suite *ScopeTestSuite) TestShowScopeByNonexistentId() {
+	// Arrange
+	db := infrastructure.ConnectDB()
+	scopeRepo := NewScopeRepository(db)
+	const nonexistentScopeId = -1337
+
+	// Action
+	scope, err := scopeRepo.FindById(nonexistentScopeId)
+
+	// Assert
+	assert.Nil(suite.T(), scope)
+	assert.NotNil(suite.T(), err)
+	assert.Equal(suite.T(), err, errors.New("SCOPE_REPOSITORY.SCOPE_NOT_FOUND"))
 }
 
 func (suite *ScopeTestSuite) TestUpdateScope() {
-
-	repoScopeMock := RepoScopeMock{}
-	scope := &domain.Scope{
-		Name:        "WrongScope:Update",
-		Description: "Update a scope",
-	}
-	now := time.Now()
-	CreateScopeReponse := &domain.Scope{
-		Id:          1,
-		Name:        "WrongScope:Update",
-		Description: "Update a scope",
-		CreatedAt:   &now,
-	}
-	repoScopeMock.On("Create", scope).Return(CreateScopeReponse, nil)
-	CreateScopeReponse = &domain.Scope{
-		Id:          1,
-		Name:        "Scope:Update",
-		Description: "Update a scope",
-		CreatedAt:   &now,
-	}
-	now = time.Now()
-	UpdateScopeResponse := &domain.Scope{
-		Id:          1,
-		Name:        "Scope:Update",
-		Description: "Update a scope",
-		CreatedAt:   &now,
-		UpdatedAt:   &now,
-	}
-	repoScopeMock.On("Update", CreateScopeReponse).Return(UpdateScopeResponse, nil)
-
-	// Update a Scope with mock
-	scope, err := repoScopeMock.Create(scope)
-	assert.Nil(suite.T(), err)
-	assert.NotNil(suite.T(), scope)
-
-	scope, err = repoScopeMock.Update(CreateScopeReponse)
-	assert.Nil(suite.T(), err)
-	assert.Equal(suite.T(), "Scope:Update", scope.Name)
-
+	// Arrange
 	db := infrastructure.ConnectDB()
-	repoScope := NewScopeRepository(db)
+	scopeRepo := NewScopeRepository(db)
 
-	//Update a Scope to DB
-	scope, err = repoScope.Create(scope)
+	/// Creating new scope
+	scope, err := scopeRepo.Create(
+		&domain.Scope{
+			Name:        "WrongScope:Update",
+			Description: "Update a scope",
+		},
+	)
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
 
+	// Action
 	scope.Name = "Scope:Update"
-	scope, err = repoScope.Update(scope)
+	scope, err = scopeRepo.Update(scope)
+
+	// Assert
 	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), scope)
 	assert.Equal(suite.T(), "Scope:Update", scope.Name)
 
+	/// Make sure the updated scope persists in database
+	scope, _ = scopeRepo.FindById(scope.Id)
+	assert.NotNil(suite.T(), scope)
+	assert.Equal(suite.T(),
+		scope,
+		&domain.Scope{
+			Id:          scope.Id,
+			Name:        "Scope:Update",
+			Description: "Update a scope",
+			CreatedAt:   scope.CreatedAt,
+			UpdatedAt:   scope.UpdatedAt,
+		},
+	)
 }
 
 func (suite *ScopeTestSuite) TestDeleteScope() {
+	// Arrange
 	db := infrastructure.ConnectDB()
-	repoScope := NewScopeRepository(db)
-	scope := &domain.Scope{
-		Name:        "Scope:Delete",
-		Description: "Delete a scope",
-	}
+	scopeRepo := NewScopeRepository(db)
 
-	//Delete a Scope
-	scope, err := repoScope.Create(scope)
+	/// Creating two scopes
+	_, err := scopeRepo.Create(
+		&domain.Scope{
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+		},
+	)
+	assert.Nil(suite.T(), err)
+	scope, err := scopeRepo.Create(
+		&domain.Scope{
+			Name:        "Scope:Delete",
+			Description: "Delete a scope",
+		},
+	)
 	assert.Nil(suite.T(), err)
 
-	err = repoScope.Delete(scope)
+	/// Make sure there are two scope persist in database
+	scopes, err := scopeRepo.FindAll()
+	assert.Equal(suite.T(), len(scopes), 2)
+
+	// Action
+	err = scopeRepo.Delete(scope)
+
+	// Assert
 	assert.Nil(suite.T(), err)
 
+	/// Make sure there are only one scope persist in database
+	scopes, err = scopeRepo.FindAll()
+	remainingScope := scopes[0]
+	assert.Equal(suite.T(), len(scopes), 1)
+
+	assert.Contains(
+		suite.T(),
+		scopes,
+		&domain.Scope{
+			Id:          remainingScope.Id,
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+			CreatedAt:   remainingScope.CreatedAt,
+			UpdatedAt:   remainingScope.UpdatedAt,
+		},
+	)
+	assert.Equal(
+		suite.T(),
+		remainingScope,
+		&domain.Scope{
+			Id:          remainingScope.Id,
+			Name:        "Scope:Create",
+			Description: "Create a scope",
+			CreatedAt:   remainingScope.CreatedAt,
+			UpdatedAt:   remainingScope.UpdatedAt,
+		},
+	)
 }
 
 func TestScopeTestSuite(t *testing.T) {
