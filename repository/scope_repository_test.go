@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/ryakadev/rdf-be-auth-svc/domain"
@@ -14,6 +15,7 @@ import (
 
 type ScopeTestSuite struct {
 	suite.Suite
+	startTime time.Time
 }
 
 func (suite *ScopeTestSuite) SetupTest() {
@@ -23,20 +25,34 @@ func (suite *ScopeTestSuite) SetupTest() {
 	if err != nil {
 		log.Println("Error loading .env file in ScopeTestSuite.SetupTest(). Using default env...")
 	}
+	suite.startTime = time.Now()
 }
 
 func (suite *ScopeTestSuite) TearDownTest() {
 	db := infrastructure.ConnectDB()
-	db.Exec("DELETE FROM scopes WHERE 1=1")
+	db.Exec("DELETE FROM scopes WHERE created_at >= ?", suite.startTime)
 }
+
+// Get current scopes length is important for test cases that utilize scopes length comparison.
+// Pro: The late "scopes length comparison" comes in handy in case seeders data already exist inside the database
+// Cons: Increasing numbers of test check/assertion conducted
+func getCurrentScopesLength(t *testing.T, repo domain.ScopeRepository) int {
+	scopes, err := repo.FindAll()
+	assert.Nil(t, err)
+	return len(scopes)
+}
+
 func (suite *ScopeTestSuite) TestCreateScope() {
 	// Arrange
 	scope := &domain.Scope{
-		Name:        "Scope:Create",
+		Name:        "ScopeTest:Create",
 		Description: "Create a scope",
 	}
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
+
+	/// Get current scope length
+	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
 
 	// Action
 	scope, err := scopeRepo.Create(scope)
@@ -49,7 +65,7 @@ func (suite *ScopeTestSuite) TestCreateScope() {
 		scope,
 		&domain.Scope{
 			Id:          scope.Id,
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 			CreatedAt:   scope.CreatedAt,
 			UpdatedAt:   scope.UpdatedAt,
@@ -57,14 +73,15 @@ func (suite *ScopeTestSuite) TestCreateScope() {
 	)
 
 	/// Make sure there are one scope persists in database
-	scopes, err := scopeRepo.FindAll()
-	assert.Equal(suite.T(), len(scopes), 1)
+	scopes, _ := scopeRepo.FindAll()
+	assert.GreaterOrEqual(suite.T(), len(scopes), 1)
+	assert.Equal(suite.T(), len(scopes), oldScopesLength+1)
 }
 
 func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
 	// Arrange
 	scope := &domain.Scope{
-		Name:        "Scope:Create",
+		Name:        "ScopeTest:Create",
 		Description: "Create a scope",
 	}
 	db := infrastructure.ConnectDB()
@@ -88,17 +105,20 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
+	/// Get current scope length
+	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
+
 	/// Creating two scopes
 	_, err := scopeRepo.Create(
 		&domain.Scope{
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 		},
 	)
 	assert.Nil(suite.T(), err)
 	_, err = scopeRepo.Create(
 		&domain.Scope{
-			Name:        "Scope:ShowAll",
+			Name:        "ScopeTest:ShowAll",
 			Description: "Show all scopes",
 		},
 	)
@@ -106,18 +126,20 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 
 	// Action
 	scopes, err := scopeRepo.FindAll()
-	firstScope, secondScope := scopes[0], scopes[1]
+	firstScope, secondScope := scopes[len(scopes)-2], scopes[len(scopes)-1]
 
 	// Assert
+	/// Make sure there are two scope persist in database
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scopes)
-	assert.Equal(suite.T(), len(scopes), 2)
+	assert.GreaterOrEqual(suite.T(), len(scopes), 2)
+	assert.Equal(suite.T(), len(scopes), oldScopesLength+2)
 	assert.Contains(
 		suite.T(),
 		scopes,
 		&domain.Scope{
 			Id:          firstScope.Id,
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 			CreatedAt:   firstScope.CreatedAt,
 			UpdatedAt:   firstScope.UpdatedAt,
@@ -128,7 +150,7 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 		firstScope,
 		&domain.Scope{
 			Id:          firstScope.Id,
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 			CreatedAt:   firstScope.CreatedAt,
 			UpdatedAt:   firstScope.UpdatedAt,
@@ -139,7 +161,7 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 		scopes,
 		&domain.Scope{
 			Id:          secondScope.Id,
-			Name:        "Scope:ShowAll",
+			Name:        "ScopeTest:ShowAll",
 			Description: "Show all scopes",
 			CreatedAt:   secondScope.CreatedAt,
 			UpdatedAt:   secondScope.UpdatedAt,
@@ -150,7 +172,7 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 		secondScope,
 		&domain.Scope{
 			Id:          secondScope.Id,
-			Name:        "Scope:ShowAll",
+			Name:        "ScopeTest:ShowAll",
 			Description: "Show all scopes",
 			CreatedAt:   secondScope.CreatedAt,
 			UpdatedAt:   secondScope.UpdatedAt,
@@ -164,7 +186,7 @@ func (suite *ScopeTestSuite) TestShowScopeById() {
 	scopeRepo := NewScopeRepository(db)
 	scope, err := scopeRepo.Create(
 		&domain.Scope{
-			Name:        "Scope:Show",
+			Name:        "ScopeTest:Show",
 			Description: "Show a scope",
 		},
 	)
@@ -182,7 +204,7 @@ func (suite *ScopeTestSuite) TestShowScopeById() {
 		scope,
 		&domain.Scope{
 			Id:          scope.Id,
-			Name:        "Scope:Show",
+			Name:        "ScopeTest:Show",
 			Description: "Show a scope",
 			CreatedAt:   scope.CreatedAt,
 			UpdatedAt:   scope.UpdatedAt,
@@ -222,13 +244,13 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 	scopePastUpdatedAt := *scope.UpdatedAt
 
 	// Action
-	scope.Name = "Scope:Update"
+	scope.Name = "ScopeTest:Update"
 	scope, err = scopeRepo.Update(scope)
 
 	// Assert
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
-	assert.Equal(suite.T(), "Scope:Update", scope.Name)
+	assert.Equal(suite.T(), "ScopeTest:Update", scope.Name)
 
 	/// Make sure the updated scope persists in database
 	scope, _ = scopeRepo.FindById(scope.Id)
@@ -238,7 +260,7 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 		scope,
 		&domain.Scope{
 			Id:          scope.Id,
-			Name:        "Scope:Update",
+			Name:        "ScopeTest:Update",
 			Description: "Update a scope",
 			CreatedAt:   scope.CreatedAt,
 			UpdatedAt:   scope.UpdatedAt,
@@ -257,17 +279,20 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
+	/// Get current scope length
+	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
+
 	/// Creating two scopes
 	_, err := scopeRepo.Create(
 		&domain.Scope{
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 		},
 	)
 	assert.Nil(suite.T(), err)
 	scope, err := scopeRepo.Create(
 		&domain.Scope{
-			Name:        "Scope:Delete",
+			Name:        "ScopeTest:Delete",
 			Description: "Delete a scope",
 		},
 	)
@@ -275,7 +300,8 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 
 	/// Make sure there are two scope persist in database
 	scopes, err := scopeRepo.FindAll()
-	assert.Equal(suite.T(), len(scopes), 2)
+	assert.GreaterOrEqual(suite.T(), len(scopes), 2)
+	assert.Equal(suite.T(), len(scopes), oldScopesLength+2)
 
 	// Action
 	err = scopeRepo.Delete(scope)
@@ -283,17 +309,18 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	// Assert
 	assert.Nil(suite.T(), err)
 
-	/// Make sure there are only one scope persist in database
+	/// Make sure there are only one scope remains in database
 	scopes, err = scopeRepo.FindAll()
-	remainingScope := scopes[0]
-	assert.Equal(suite.T(), len(scopes), 1)
+	remainingScope := scopes[len(scopes)-1]
+	assert.GreaterOrEqual(suite.T(), len(scopes), 1)
+	assert.Equal(suite.T(), len(scopes), oldScopesLength+1)
 
 	assert.Contains(
 		suite.T(),
 		scopes,
 		&domain.Scope{
 			Id:          remainingScope.Id,
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 			CreatedAt:   remainingScope.CreatedAt,
 			UpdatedAt:   remainingScope.UpdatedAt,
@@ -304,7 +331,7 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 		remainingScope,
 		&domain.Scope{
 			Id:          remainingScope.Id,
-			Name:        "Scope:Create",
+			Name:        "ScopeTest:Create",
 			Description: "Create a scope",
 			CreatedAt:   remainingScope.CreatedAt,
 			UpdatedAt:   remainingScope.UpdatedAt,
