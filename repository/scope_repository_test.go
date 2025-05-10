@@ -33,10 +33,10 @@ func (suite *ScopeTestSuite) TearDownTest() {
 	db.Exec("DELETE FROM scopes WHERE created_at >= ?", suite.startTime)
 }
 
-// Get current scopes length is important for test cases that utilize scopes length comparison.
-// Pro: The late "scopes length comparison" comes in handy in case seeders data already exist inside the database
+// Get current scopes count is important for test cases that utilize scopes count comparison.
+// Pro: The late "scopes count comparison" comes in handy in case seeders data already exist inside the database
 // Cons: Increasing numbers of test check/assertion conducted
-func getCurrentScopesLength(t *testing.T, repo domain.ScopeRepository) int {
+func getCurrentScopesCount(t *testing.T, repo domain.ScopeRepository) int {
 	scopes, err := repo.FindAll()
 	assert.Nil(t, err)
 	return len(scopes)
@@ -51,8 +51,8 @@ func (suite *ScopeTestSuite) TestCreateScope() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
-	/// Get current scope length
-	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
+	/// Get current scope count
+	oldScopesCount := getCurrentScopesCount(suite.T(), scopeRepo)
 
 	// Action
 	scope, err := scopeRepo.Create(scope)
@@ -75,7 +75,7 @@ func (suite *ScopeTestSuite) TestCreateScope() {
 	/// Make sure there are one scope persists in database
 	scopes, _ := scopeRepo.FindAll()
 	assert.GreaterOrEqual(suite.T(), len(scopes), 1)
-	assert.Equal(suite.T(), len(scopes), oldScopesLength+1)
+	assert.Equal(suite.T(), len(scopes), oldScopesCount+1)
 }
 
 func (suite *ScopeTestSuite) TestCreateScopeWithExistingName() {
@@ -105,8 +105,8 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
-	/// Get current scope length
-	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
+	/// Get current scope count
+	oldScopesCount := getCurrentScopesCount(suite.T(), scopeRepo)
 
 	/// Creating two scopes
 	_, err := scopeRepo.Create(
@@ -133,7 +133,7 @@ func (suite *ScopeTestSuite) TestShowScopes() {
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scopes)
 	assert.GreaterOrEqual(suite.T(), len(scopes), 2)
-	assert.Equal(suite.T(), len(scopes), oldScopesLength+2)
+	assert.Equal(suite.T(), len(scopes), oldScopesCount+2)
 	assert.Contains(
 		suite.T(),
 		scopes,
@@ -279,8 +279,8 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	db := infrastructure.ConnectDB()
 	scopeRepo := NewScopeRepository(db)
 
-	/// Get current scope length
-	oldScopesLength := getCurrentScopesLength(suite.T(), scopeRepo)
+	/// Get current scope count
+	oldScopesCount := getCurrentScopesCount(suite.T(), scopeRepo)
 
 	/// Creating two scopes
 	_, err := scopeRepo.Create(
@@ -301,7 +301,7 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	/// Make sure there are two scope persist in database
 	scopes, err := scopeRepo.FindAll()
 	assert.GreaterOrEqual(suite.T(), len(scopes), 2)
-	assert.Equal(suite.T(), len(scopes), oldScopesLength+2)
+	assert.Equal(suite.T(), len(scopes), oldScopesCount+2)
 
 	// Action
 	err = scopeRepo.Delete(scope)
@@ -313,7 +313,7 @@ func (suite *ScopeTestSuite) TestDeleteScope() {
 	scopes, err = scopeRepo.FindAll()
 	remainingScope := scopes[len(scopes)-1]
 	assert.GreaterOrEqual(suite.T(), len(scopes), 1)
-	assert.Equal(suite.T(), len(scopes), oldScopesLength+1)
+	assert.Equal(suite.T(), len(scopes), oldScopesCount+1)
 
 	assert.Contains(
 		suite.T(),
