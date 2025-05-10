@@ -177,7 +177,8 @@ func (suite *ScopeTestSuite) TestShowScopeById() {
 	// Assert
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
-	assert.Equal(suite.T(),
+	assert.Equal(
+		suite.T(),
 		scope,
 		&domain.Scope{
 			Id:          scope.Id,
@@ -218,6 +219,7 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 	)
 	assert.Nil(suite.T(), err)
 	assert.NotNil(suite.T(), scope)
+	scopePastUpdatedAt := *scope.UpdatedAt
 
 	// Action
 	scope.Name = "Scope:Update"
@@ -231,7 +233,8 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 	/// Make sure the updated scope persists in database
 	scope, _ = scopeRepo.FindById(scope.Id)
 	assert.NotNil(suite.T(), scope)
-	assert.Equal(suite.T(),
+	assert.Equal(
+		suite.T(),
 		scope,
 		&domain.Scope{
 			Id:          scope.Id,
@@ -241,6 +244,12 @@ func (suite *ScopeTestSuite) TestUpdateScope() {
 			UpdatedAt:   scope.UpdatedAt,
 		},
 	)
+	assert.NotEqual(
+		suite.T(),
+		scopePastUpdatedAt,
+		scope.UpdatedAt,
+	)
+	assert.True(suite.T(), scope.UpdatedAt.After(scopePastUpdatedAt))
 }
 
 func (suite *ScopeTestSuite) TestDeleteScope() {
