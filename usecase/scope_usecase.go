@@ -34,15 +34,14 @@ func (u *ScopeUsecase) ShowScopes() ([]*domain.Scope, error) {
 }
 
 func (u *ScopeUsecase) UpdateScope(scope *domain.Scope) (*domain.Scope, error) {
-	oldScope, err := u.ScopeRepository.FindById(scope.Id)
-	if err != nil || oldScope == nil {
+	findScope, err := u.ScopeRepository.FindById(scope.Id)
+	if err != nil || findScope == nil {
 		return nil, err
 	}
 	now := time.Now()
-	oldScope.Name = scope.Name
-	oldScope.UpdatedAt = &now
+	findScope.UpdatedAt = &now
 
-	return u.ScopeRepository.Update(oldScope)
+	return u.ScopeRepository.Update(findScope)
 }
 
 func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
@@ -60,5 +59,5 @@ func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
 		return errors.New("SCOPE_USE_CASE.SCOPE_TIED_TO_ROLES")
 	}
 
-	return u.ScopeRepository.Delete(oldScope)
+	return u.ScopeRepository.Delete(scope)
 }
