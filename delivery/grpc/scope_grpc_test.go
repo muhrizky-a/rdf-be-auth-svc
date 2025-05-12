@@ -33,15 +33,6 @@ func (suite *ScopeGRPCTestSuite) SetupTest() {
 		log.Println("Error loading .env file in ScopeGRPCTestSuite.SetupTest(). Using default env...")
 	}
 	suite.startTime = time.Now()
-}
-
-func (suite *ScopeGRPCTestSuite) TearDownSuite() {
-	db := infrastructure.ConnectDB()
-	db.Exec("DELETE FROM role_scopes WHERE created_at >= ?", suite.startTime)
-	db.Exec("DELETE FROM scopes WHERE created_at >= ?", suite.startTime)
-}
-
-func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 	gRPCErrorTranslator := exceptions.NewGRPCErrorTranslator()
 	validator := helper.NewValidator()
 	grpcValidator := helper.NewGRPCValidator(validator, gRPCErrorTranslator)
@@ -50,8 +41,16 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopesRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopesRepo)
-	scopeGRPC := NewScopeGRPC(scopeUC, grpcValidator, gRPCErrorTranslator)
+	suite.scopeGRPC = NewScopeGRPC(scopeUC, grpcValidator, gRPCErrorTranslator)
+}
 
+func (suite *ScopeGRPCTestSuite) TearDownTest() {
+	db := infrastructure.ConnectDB()
+	db.Exec("DELETE FROM role_scopes WHERE created_at >= ?", suite.startTime)
+	db.Exec("DELETE FROM scopes WHERE created_at >= ?", suite.startTime)
+}
+
+func (suite *ScopeGRPCTestSuite) TestCreateScopeHandler() {
 	// Arrange
 	scope := domain.Scope{
 		Name:        "ScopeTest:Create",
@@ -60,7 +59,7 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 
 	suite.T().Run("Create a new Scope", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.CreateScope(
+		res, err := suite.scopeGRPC.CreateScope(
 			context.Background(),
 			&proto.CreateScopeRequest{Name: scope.Name, Description: scope.Description},
 		)
@@ -85,9 +84,26 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 		)
 	})
 
+	suite.T().Run("Create Scope with empty payload", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.CreateScope(
+			context.Background(),
+			&proto.CreateScopeRequest{},
+		)
+
+		// Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = InvalidArgument desc = validation error: missing request bodies",
+		)
+	})
+
 	suite.T().Run("Create duplicate Scope", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.CreateScope(
+		res, err := suite.scopeGRPC.CreateScope(
 			context.Background(),
 			&proto.CreateScopeRequest{Name: scope.Name, Description: scope.Description},
 		)
@@ -101,11 +117,29 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 			"rpc error: code = InvalidArgument desc = Scope with such name already exists",
 		)
 	})
+}
 
-	suite.T().Run("Show Scopes", func(t *testing.T) {
+func (suite *ScopeGRPCTestSuite) TestShowScopesHandler() {
+	// Arrange
+	_, _ = suite.scopeGRPC.CreateScope(
+		context.Background(),
+		&proto.CreateScopeRequest{
+			Name:        "ScopeTest:Create",
+			Description: "Create a scope",
+		},
+	)
+	_, _ = suite.scopeGRPC.CreateScope(
+		context.Background(),
+		&proto.CreateScopeRequest{
+			Name:        "ScopeTest:ShowAll",
+			Description: "Show all scopes",
+		},
+	)
+
+	suite.T().Run("Show Scopes with two recently-created Scopes", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.ListScope(context.Background(), &proto.ListScopeRequest{})
-		latestScope := res.Body.Scopes[len(res.Body.Scopes)-1]
+		res, err := suite.scopeGRPC.ListScope(context.Background(), &proto.ListScopeRequest{})
+		firstScope, secondScope := res.Body.Scopes[len(res.Body.Scopes)-2], res.Body.Scopes[len(res.Body.Scopes)-1]
 
 		// Assert
 		assert.Nil(suite.T(), err)
@@ -113,25 +147,70 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 		assert.Equal(suite.T(), res.StatusCode, int32(codes.OK))
 		assert.Equal(suite.T(), res.Message, "Scope retrieved succesfully")
 		assert.NotNil(suite.T(), res.Body.Scopes)
-		assert.GreaterOrEqual(suite.T(), len(res.Body.Scopes), 1)
-		assert.Equal(
+		assert.GreaterOrEqual(suite.T(), len(res.Body.Scopes), 2)
+		assert.Contains(
 			suite.T(),
-			latestScope,
+			res.Body.Scopes,
 			&proto.Scope{
-				Id:          latestScope.Id,
+				Id:          firstScope.Id,
 				Name:        "ScopeTest:Create",
 				Description: "Create a scope",
-				CreatedAt:   latestScope.CreatedAt,
-				UpdatedAt:   latestScope.UpdatedAt,
+				CreatedAt:   firstScope.CreatedAt,
+				UpdatedAt:   firstScope.UpdatedAt,
+			},
+		)
+		assert.Equal(
+			suite.T(),
+			firstScope,
+			&proto.Scope{
+				Id:          firstScope.Id,
+				Name:        "ScopeTest:Create",
+				Description: "Create a scope",
+				CreatedAt:   firstScope.CreatedAt,
+				UpdatedAt:   firstScope.UpdatedAt,
+			},
+		)
+		assert.Contains(
+			suite.T(),
+			res.Body.Scopes,
+			&proto.Scope{
+				Id:          secondScope.Id,
+				Name:        "ScopeTest:ShowAll",
+				Description: "Show all scopes",
+				CreatedAt:   secondScope.CreatedAt,
+				UpdatedAt:   secondScope.UpdatedAt,
+			},
+		)
+		assert.Equal(
+			suite.T(),
+			secondScope,
+			&proto.Scope{
+				Id:          secondScope.Id,
+				Name:        "ScopeTest:ShowAll",
+				Description: "Show all scopes",
+				CreatedAt:   secondScope.CreatedAt,
+				UpdatedAt:   secondScope.UpdatedAt,
 			},
 		)
 	})
+}
+
+func (suite *ScopeGRPCTestSuite) TestGetScopeHandler() {
+	// Arrange
+	res, _ := suite.scopeGRPC.CreateScope(
+		context.Background(),
+		&proto.CreateScopeRequest{
+			Name:        "ScopeTest:Show",
+			Description: "Show a scope",
+		},
+	)
+	scopeId := res.Body.Scope.Id
 
 	suite.T().Run("Get a Scope", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.GetScope(
+		res, err := suite.scopeGRPC.GetScope(
 			context.Background(),
-			&proto.GetScopeRequest{Id: scope.Id},
+			&proto.GetScopeRequest{Id: scopeId},
 		)
 
 		// Assert
@@ -145,20 +224,49 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 			res.Body.Scope,
 			&proto.Scope{
 				Id:          res.Body.Scope.Id,
-				Name:        "ScopeTest:Create",
-				Description: "Create a scope",
+				Name:        "ScopeTest:Show",
+				Description: "Show a scope",
 				CreatedAt:   res.Body.Scope.CreatedAt,
 				UpdatedAt:   res.Body.Scope.UpdatedAt,
 			},
 		)
 	})
 
+	suite.T().Run("Get a Scope with nonexistent Id", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.GetScope(
+			context.Background(),
+			&proto.GetScopeRequest{Id: -1337},
+		)
+
+		// // Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = NotFound desc = Scope not found",
+		)
+	})
+}
+
+func (suite *ScopeGRPCTestSuite) TestUpdateScopeHandler() {
+	// Arrange
+	res, _ := suite.scopeGRPC.CreateScope(
+		context.Background(),
+		&proto.CreateScopeRequest{
+			Name:        "WrongScope:Update",
+			Description: "Update a wrong scope",
+		},
+	)
+	scopeId := res.Body.Scope.Id
+
 	suite.T().Run("Update a Scope", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.UpdateScope(
+		res, err := suite.scopeGRPC.UpdateScope(
 			context.Background(),
 			&proto.UpdateScopeRequest{
-				Id:          scope.Id,
+				Id:          scopeId,
 				Name:        "ScopeTest:Update",
 				Description: "Update a scope",
 			},
@@ -183,11 +291,61 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 		)
 	})
 
+	suite.T().Run("Update a Scope with empty payload", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.UpdateScope(
+			context.Background(),
+			&proto.UpdateScopeRequest{},
+		)
+
+		// Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = InvalidArgument desc = validation error: missing request bodies",
+		)
+	})
+
+	suite.T().Run("Update a Scope with nonexistent Id", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.UpdateScope(
+			context.Background(),
+			&proto.UpdateScopeRequest{
+				Id:          -1337,
+				Name:        "ScopeTest:Update",
+				Description: "Update a scope",
+			},
+		)
+
+		// // Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = NotFound desc = Scope not found",
+		)
+	})
+}
+
+func (suite *ScopeGRPCTestSuite) TestDeleteScopeHandler() {
+	// Arrange
+	res, _ := suite.scopeGRPC.CreateScope(
+		context.Background(),
+		&proto.CreateScopeRequest{
+			Name:        "ScopeTest:Delete",
+			Description: "Delete a scope",
+		},
+	)
+	scopeId := res.Body.Scope.Id
+
 	suite.T().Run("Delete a Scope", func(t *testing.T) {
 		// Action
-		res, err := scopeGRPC.DeleteScope(
+		res, err := suite.scopeGRPC.DeleteScope(
 			context.Background(),
-			&proto.DeleteScopeRequest{Id: scope.Id},
+			&proto.DeleteScopeRequest{Id: scopeId},
 		)
 
 		// Assert
@@ -195,6 +353,40 @@ func (suite *ScopeGRPCTestSuite) TestScopeHandler() {
 		assert.NotNil(suite.T(), res)
 		assert.Equal(suite.T(), res.StatusCode, int32(codes.OK))
 		assert.Equal(suite.T(), res.Message, "Scope deleted succesfully")
+	})
+
+	suite.T().Run("Delete a Scope with empty payload", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.DeleteScope(
+			context.Background(),
+			&proto.DeleteScopeRequest{},
+		)
+
+		// Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = InvalidArgument desc = validation error: missing request bodies",
+		)
+	})
+
+	suite.T().Run("Delete a Scope with nonexistent Id", func(t *testing.T) {
+		// Action
+		res, err := suite.scopeGRPC.DeleteScope(
+			context.Background(),
+			&proto.DeleteScopeRequest{Id: -1337},
+		)
+
+		// // Assert
+		assert.Nil(suite.T(), res)
+		assert.NotNil(suite.T(), err)
+		assert.Equal(
+			suite.T(),
+			err.Error(),
+			"rpc error: code = NotFound desc = Scope not found",
+		)
 	})
 }
 
