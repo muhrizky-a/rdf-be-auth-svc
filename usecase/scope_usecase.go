@@ -59,5 +59,5 @@ func (u *ScopeUsecase) DeleteScope(scope *domain.Scope) error {
 		return errors.New("SCOPE_USE_CASE.SCOPE_TIED_TO_ROLES")
 	}
 
-	return u.ScopeRepository.Delete(scope)
+	return u.ScopeRepository.Delete(oldScope)
 }
