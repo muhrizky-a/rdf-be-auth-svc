@@ -45,13 +45,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	httpErrorTranslator := exceptions.NewHTTPErrorTranslator()
+	gRPCErrorTranslator := exceptions.NewGRPCErrorTranslator()
 	validator := helper.NewValidator()
-	grpcValidator := helper.NewGRPCValidator(validator, httpErrorTranslator)
+	grpcValidator := helper.NewGRPCValidator(validator, gRPCErrorTranslator)
 	scopeRepo := repository.NewScopeRepository(db)
 	roleScopeRepo := repository.NewRoleScopeRepository(db)
 	scopeUC := usecase.NewScopeUsecase(scopeRepo, roleScopeRepo)
-	scopeGRPC := grpc.NewScopeGRPC(scopeUC, grpcValidator, httpErrorTranslator)
+	scopeGRPC := grpc.NewScopeGRPC(scopeUC, grpcValidator, gRPCErrorTranslator)
 
 	gRPCServer := gogrpc.NewServer()
 	proto.RegisterScopeServiceServer(gRPCServer, scopeGRPC)
