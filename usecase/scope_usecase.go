@@ -39,6 +39,8 @@ func (u *ScopeUsecase) UpdateScope(scope *domain.Scope) (*domain.Scope, error) {
 		return nil, err
 	}
 	now := time.Now()
+	findScope.Name = scope.Name
+	findScope.Description = scope.Description
 	findScope.UpdatedAt = &now
 
 	return u.ScopeRepository.Update(findScope)
