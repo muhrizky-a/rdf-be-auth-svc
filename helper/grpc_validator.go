@@ -12,16 +12,16 @@ import (
 
 type GRPCValidator struct {
 	*Validator
-	httpErrorTranslator *exceptions.HTTPErrorTranslator
+	gRPCErrorTranslator *exceptions.GRPCErrorTranslator
 }
 
 func NewGRPCValidator(
 	validator *Validator,
-	httpErrorTranslator *exceptions.HTTPErrorTranslator,
+	gRPCErrorTranslator *exceptions.GRPCErrorTranslator,
 ) *GRPCValidator {
 	return &GRPCValidator{
 		validator,
-		httpErrorTranslator,
+		gRPCErrorTranslator,
 	}
 }
 
@@ -30,7 +30,7 @@ func (v *GRPCValidator) CreateGRPCValidationError(err error) error {
 	if unknownValidationErr != nil {
 		return status.Errorf(
 			codes.Unknown,
-			v.httpErrorTranslator.TranslateMessage(unknownValidationErr),
+			v.gRPCErrorTranslator.TranslateMessage(unknownValidationErr),
 		)
 	}
 
@@ -70,7 +70,7 @@ func (v *GRPCValidator) CreateGRPCValidationError(err error) error {
 
 	newErr := status.New(
 		codes.InvalidArgument,
-		v.httpErrorTranslator.TranslateMessage(
+		v.gRPCErrorTranslator.TranslateMessage(
 			errors.New("VALIDATOR.INVALID_DATA"),
 		),
 	)
